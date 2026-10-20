@@ -54,6 +54,7 @@ img { display: block; }
 .act-row .act { flex-direction: column; text-align: center; gap: 8px; padding: 16px 10px; }
 .socials { display: flex; justify-content: center; gap: 14px; margin-top: 26px; }
 .socials a { width: 46px; height: 46px; border-radius: 50%; background: var(--surface); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; color: var(--text); text-decoration: none; font-size: 18px; font-weight: 800; }
+.socials a svg { width: 22px; height: 22px; display: block; }
 .foot { text-align: center; color: var(--muted); font-size: 12px; margin-top: 22px; }
 
 /* ===== Меню ===== */
@@ -427,6 +428,12 @@ const I18N = {
 // =====================================================================
 const API = window.QR_API_BASE || '';   // куда отправлять заказы (на GitHub — адрес ngrok ресторана)
 const DATA = window.QR_DATA_BASE != null ? window.QR_DATA_BASE : API; // откуда брать меню/настройки для быстрого открытия
+// Значки соцсетей внизу страницы (20.10): контур в цвет текста шаблона, вместо букв IG / f / WA
+const SOC_ICONS = {
+    instagram: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg>',
+    facebook: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M13.5 21v-7.5h2.6l.4-3h-3V8.6c0-.9.3-1.5 1.5-1.5h1.6V4.4c-.3 0-1.2-.1-2.3-.1-2.3 0-3.8 1.4-3.8 3.9v2.3H8v3h2.5V21h3z"/></svg>',
+    whatsapp: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 20.5l1.3-4.3A8.5 8.5 0 1 1 8 19.3z"/><path d="M9 8.5c0 3.3 3.2 6.5 6.5 6.5l1-1.5-2-1-1 .8c-1-.4-2.4-1.8-2.8-2.8l.8-1-1-2z" fill="currentColor" stroke="none"/></svg>'
+};
 const params = new URLSearchParams(location.search);
 const IS_PREVIEW = params.get('preview') === '1';
 let S = null;               // настройки (guest_settings.json)
@@ -434,6 +441,10 @@ let MENU = [];              // меню из 1С
 let security = {};
 let lang = 'ru';
 let cart = {};              // { id: { qty, comment } }
+// Ссылка без стола (Instagram, сайт) — только просмотр: запомненный стол с прошлого QR не подставляем (20.10).
+// Запомненный стол берём лишь при обновлении страницы или «Назад».
+const NAV_TYPE = (() => { try { return (performance.getEntriesByType('navigation')[0] || {}).type || 'navigate'; } catch (e) { return 'navigate'; } })();
+if (!params.get('table') && NAV_TYPE === 'navigate') { sessionStorage.removeItem('qr_table'); sessionStorage.removeItem('qr_hall'); }
 let tableId = params.get('table') || sessionStorage.getItem('qr_table') || '';
 let hall = params.get('hall') || sessionStorage.getItem('qr_hall') || '';
 let cooldown = false;
@@ -506,9 +517,9 @@ function renderHome() {
     $('info-acts').innerHTML = acts ? '<div style="display:flex;flex-direction:column;gap:10px;margin-top:10px">' + acts + '</div>' : '';
 
     let soc = '';
-    if (safeUrl(i.instagram)) soc += `<a href="${esc(safeUrl(i.instagram))}" target="_blank" rel="noopener" aria-label="Instagram">IG</a>`;
-    if (safeUrl(i.facebook)) soc += `<a href="${esc(safeUrl(i.facebook))}" target="_blank" rel="noopener" aria-label="Facebook">f</a>`;
-    if (safeUrl(i.whatsapp)) soc += `<a href="${esc(safeUrl(i.whatsapp))}" target="_blank" rel="noopener" aria-label="WhatsApp">WA</a>`;
+    if (safeUrl(i.instagram)) soc += `<a href="${esc(safeUrl(i.instagram))}" target="_blank" rel="noopener" aria-label="Instagram">${SOC_ICONS.instagram}</a>`;
+    if (safeUrl(i.facebook)) soc += `<a href="${esc(safeUrl(i.facebook))}" target="_blank" rel="noopener" aria-label="Facebook">${SOC_ICONS.facebook}</a>`;
+    if (safeUrl(i.whatsapp)) soc += `<a href="${esc(safeUrl(i.whatsapp))}" target="_blank" rel="noopener" aria-label="WhatsApp">${SOC_ICONS.whatsapp}</a>`;
     $('socials').innerHTML = soc;
     $('foot').textContent = '© ' + new Date().getFullYear() + ' ' + (i.name || '');
 
