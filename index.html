@@ -38,6 +38,12 @@ img { display: block; }
 .status-pill i { width: 8px; height: 8px; border-radius: 50%; background: #22c55e; }
 .status-pill.closed i { background: #ef4444; }
 .table-chip { display: inline-block; margin-top: 10px; font-size: 13px; color: var(--muted); }
+/* «Сервис 6%» — короткая метка, чтобы гость знал заранее (21.10, владелец: без подробностей) */
+.svc-note { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 700; letter-spacing: .3px;
+    padding: 5px 12px; border-radius: 999px; color: var(--accent); background: color-mix(in srgb, var(--accent) 14%, transparent); white-space: nowrap; }
+.svc-note::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+.brand .svc-note { margin: 10px auto 0; }
+#menu .svc-note { margin: 10px 16px 0; }
 .home-actions { padding: 24px 16px 0; display: flex; flex-direction: column; gap: 10px; }
 .big-btn { width: 100%; border: none; cursor: pointer; background: var(--accent); color: var(--accent-text); font-size: 17px; font-weight: 800;
     padding: 18px; border-radius: var(--radius); display: flex; align-items: center; justify-content: center; gap: 10px; }
@@ -269,6 +275,7 @@ html[data-tpl="wine-steak"] .section h3 {
         <p id="r-desc"></p>
         <div class="status-pill hidden" id="r-status"><i></i><span></span></div>
         <div class="table-chip" id="table-chip"></div>
+        <div class="svc-note hidden" id="svc-home"></div>
     </div>
     <div class="home-actions">
         <button class="big-btn" onclick="openMenu()">🍽️ <span data-t="openMenu"></span></button>
@@ -292,6 +299,7 @@ html[data-tpl="wine-steak"] .section h3 {
         </div>
         <div class="cats" id="cats"></div>
     </div>
+    <div class="svc-note hidden" id="svc-menu"></div>
     <div id="sections"><div class="skel"></div><div class="skel"></div><div class="skel"></div></div>
 </section>
 
@@ -394,7 +402,7 @@ const I18N = {
         tooMany: 'Слишком много запросов, подождите', netErr: 'Нет связи с рестораном', wait: 'Запрос уже отправлен, подождите', empty: 'Корзина пуста',
         stop: 'Нет в наличии', left: 'Осталось', gpsTitle: 'Нужна геолокация', gpsText: 'Разрешите доступ к местоположению, чтобы сделать заказ: так мы защищаем ресторан от ложных заказов.',
         far: 'Вы слишком далеко от ресторана. Заказы принимаются только внутри.', menuErr: 'Не удалось загрузить меню', badge_new: 'Новинка', badge_hit: 'Хит',
-        badge_spicy: 'Острое 🌶', badge_veg: 'Вегетарианское 🌿', badge_chef: 'От шефа' },
+        badge_spicy: 'Острое 🌶', badge_veg: 'Вегетарианское 🌿', badge_chef: 'От шефа', svcNote: 'Сервис {p}%' },
     az: { openMenu: 'Menyunu aç', callWaiter: 'Ofisiantı çağır', askBill: 'Hesabı istə', cart: 'Səbət', yourOrder: 'Sifarişiniz', total: 'Cəmi',
         sendOrder: 'Sifarişi göndər', orderHint: 'Ofisiant sifarişi təsdiqləyib mətbəxə ötürəcək', service: 'Xidmət', cancel: 'Ləğv et',
         search: 'Yemək axtar…', notFound: 'Heç nə tapılmadı', add: 'Əlavə et', commentPh: '💬 Qeyd (soğansız, acısız…)', open: 'Açıqdır', closed: 'Bağlıdır',
@@ -407,7 +415,7 @@ const I18N = {
         tooMany: 'Çox sorğu, bir az gözləyin', netErr: 'Restoranla əlaqə yoxdur', wait: 'Sorğu artıq göndərilib, gözləyin', empty: 'Səbət boşdur',
         stop: 'Bitib', left: 'Qalıb', gpsTitle: 'Məkan lazımdır', gpsText: 'Sifariş üçün məkana icazə verin: bu, restoranı saxta sifarişlərdən qoruyur.',
         far: 'Restorandan çox uzaqdasınız. Sifarişlər yalnız içəridə qəbul olunur.', menuErr: 'Menyu yüklənmədi', badge_new: 'Yeni', badge_hit: 'Hit',
-        badge_spicy: 'Acı 🌶', badge_veg: 'Vegetarian 🌿', badge_chef: 'Şefdən' },
+        badge_spicy: 'Acı 🌶', badge_veg: 'Vegetarian 🌿', badge_chef: 'Şefdən', svcNote: 'Servis {p}%' },
     en: { openMenu: 'Open menu', callWaiter: 'Call waiter', askBill: 'Ask for bill', cart: 'Cart', yourOrder: 'Your order', total: 'Total',
         sendOrder: 'Send order', orderHint: 'A waiter will confirm your order and pass it to the kitchen', service: 'Service', cancel: 'Cancel',
         search: 'Search dishes…', notFound: 'Nothing found', add: 'Add', commentPh: '💬 Note (no onion, not spicy…)', open: 'Open', closed: 'Closed',
@@ -420,7 +428,7 @@ const I18N = {
         tooMany: 'Too many requests, please wait', netErr: 'No connection to the restaurant', wait: 'Request already sent, please wait', empty: 'Cart is empty',
         stop: 'Sold out', left: 'Left', gpsTitle: 'Location needed', gpsText: 'Please allow location access to order: this protects the restaurant from fake orders.',
         far: 'You are too far from the restaurant. Orders are accepted inside only.', menuErr: 'Could not load the menu', badge_new: 'New', badge_hit: 'Bestseller',
-        badge_spicy: 'Spicy 🌶', badge_veg: 'Vegetarian 🌿', badge_chef: "Chef's choice" }
+        badge_spicy: 'Spicy 🌶', badge_veg: 'Vegetarian 🌿', badge_chef: "Chef's choice", svcNote: 'Service {p}%' }
 };
 
 // =====================================================================
@@ -501,6 +509,9 @@ function renderHome() {
     if (st === null) pill.classList.add('hidden');
     else { pill.classList.remove('hidden'); pill.classList.toggle('closed', !st); pill.querySelector('span').textContent = (st ? t('open') : t('closed')) + ' · ' + i.hours; }
     $('table-chip').textContent = tableId ? '🪑 ' + t('table') + ' ' + tableId : t('viewOnly');
+    const svc = Math.max(0, +i.servicePct || 0);
+    const svcText = svc ? t('svcNote').replace('{p}', String(svc).replace('.', ',')) : '';
+    ['svc-home', 'svc-menu'].forEach(id => { $(id).textContent = svcText; $(id).classList.toggle('hidden', !svc); });
 
     const canService = !!tableId;
     $('btn-waiter').classList.toggle('hidden', !canService || !S.features.callWaiter);
