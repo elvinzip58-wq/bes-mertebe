@@ -75,6 +75,18 @@ img { display: block; }
 .cats::-webkit-scrollbar { display: none; }
 .cat { flex-shrink: 0; border: 1px solid var(--border); background: var(--surface); color: var(--text); padding: 8px 14px; border-radius: 999px; font-size: 14px; font-weight: 600; cursor: pointer; white-space: nowrap; }
 .cat.on { background: var(--accent); color: var(--accent-text); border-color: var(--accent); }
+/* Кухня | Бар → плитки категорий → блюда категории (21.10) */
+.seg { display: flex; gap: 4px; margin: 10px 6px 10px; padding: 4px; background: var(--surface); border: 1px solid var(--border); border-radius: 999px; }
+.seg button { flex: 1; min-height: 40px; border: none; border-radius: 999px; background: none; color: var(--text); font-size: 15px; font-weight: 700; cursor: pointer; font-family: inherit; }
+.seg button.on { background: var(--accent); color: var(--accent-text); }
+.seg.hidden + .cats { padding-top: 10px; }
+.tiles { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 14px; }
+@media (min-width: 640px) { .tiles { grid-template-columns: repeat(3, 1fr); } }
+.tile { min-height: 86px; border: 1px solid var(--border); background: var(--surface); color: var(--text); border-radius: var(--radius); padding: 14px;
+    display: flex; flex-direction: column; justify-content: space-between; gap: 8px; text-align: left; cursor: pointer; font-family: inherit; }
+.tile:active { transform: scale(.98); }
+.tile b { font-family: var(--font-head); font-size: 15px; font-weight: 700; line-height: 1.25; overflow-wrap: anywhere; }
+.tile small { align-self: flex-start; font-size: 12px; font-weight: 700; color: var(--accent); background: color-mix(in srgb, var(--accent) 14%, transparent); padding: 2px 9px; border-radius: 999px; }
 .section { padding: 18px 14px 4px; scroll-margin-top: 120px; }
 .section h3 { font-family: var(--font-head); font-size: 21px; font-weight: 800; margin-bottom: 12px; }
 
@@ -278,6 +290,7 @@ html[data-tpl="wine-steak"] .section h3 {
         <div class="svc-note hidden" id="svc-home"></div>
     </div>
     <div class="home-actions">
+        <!-- одна кнопка; «Кухня | Бар» — уже внутри меню (21.10, владелец) -->
         <button class="big-btn" onclick="openMenu()">🍽️ <span data-t="openMenu"></span></button>
         <div class="act-row" id="service-row">
             <button class="act" id="btn-waiter" onclick="askService('waiter')"><div class="ic">🛎️</div><div class="tx"><b data-t="callWaiter"></b></div></button>
@@ -297,8 +310,13 @@ html[data-tpl="wine-steak"] .section h3 {
             <h2 id="menu-title"></h2>
             <button class="ibtn" onclick="openSearch()">🔍</button>
         </div>
-        <div class="cats" id="cats"></div>
+        <div class="seg" id="seg">
+            <button type="button" data-sec="KUXNYA" onclick="setSection('KUXNYA')">🍽️ <span data-t="kitchen"></span></button>
+            <button type="button" data-sec="BAR" onclick="setSection('BAR')">🍸 <span data-t="bar"></span></button>
+        </div>
+        <div class="cats hidden" id="cats"></div>
     </div>
+    <div class="tiles hidden" id="tiles"></div>
     <div class="svc-note hidden" id="svc-menu"></div>
     <div id="sections"><div class="skel"></div><div class="skel"></div><div class="skel"></div></div>
 </section>
@@ -402,7 +420,7 @@ const I18N = {
         tooMany: 'Слишком много запросов, подождите', netErr: 'Нет связи с рестораном', wait: 'Запрос уже отправлен, подождите', empty: 'Корзина пуста',
         stop: 'Нет в наличии', left: 'Осталось', gpsTitle: 'Нужна геолокация', gpsText: 'Разрешите доступ к местоположению, чтобы сделать заказ: так мы защищаем ресторан от ложных заказов.',
         far: 'Вы слишком далеко от ресторана. Заказы принимаются только внутри.', menuErr: 'Не удалось загрузить меню', badge_new: 'Новинка', badge_hit: 'Хит',
-        badge_spicy: 'Острое 🌶', badge_veg: 'Вегетарианское 🌿', badge_chef: 'От шефа', svcNote: 'Сервис {p}%' },
+        badge_spicy: 'Острое 🌶', badge_veg: 'Вегетарианское 🌿', badge_chef: 'От шефа', svcNote: 'Сервис {p}%', kitchen: 'Кухня', bar: 'Бар' },
     az: { openMenu: 'Menyunu aç', callWaiter: 'Ofisiantı çağır', askBill: 'Hesabı istə', cart: 'Səbət', yourOrder: 'Sifarişiniz', total: 'Cəmi',
         sendOrder: 'Sifarişi göndər', orderHint: 'Ofisiant sifarişi təsdiqləyib mətbəxə ötürəcək', service: 'Xidmət', cancel: 'Ləğv et',
         search: 'Yemək axtar…', notFound: 'Heç nə tapılmadı', add: 'Əlavə et', commentPh: '💬 Qeyd (soğansız, acısız…)', open: 'Açıqdır', closed: 'Bağlıdır',
@@ -415,7 +433,7 @@ const I18N = {
         tooMany: 'Çox sorğu, bir az gözləyin', netErr: 'Restoranla əlaqə yoxdur', wait: 'Sorğu artıq göndərilib, gözləyin', empty: 'Səbət boşdur',
         stop: 'Bitib', left: 'Qalıb', gpsTitle: 'Məkan lazımdır', gpsText: 'Sifariş üçün məkana icazə verin: bu, restoranı saxta sifarişlərdən qoruyur.',
         far: 'Restorandan çox uzaqdasınız. Sifarişlər yalnız içəridə qəbul olunur.', menuErr: 'Menyu yüklənmədi', badge_new: 'Yeni', badge_hit: 'Hit',
-        badge_spicy: 'Acı 🌶', badge_veg: 'Vegetarian 🌿', badge_chef: 'Şefdən', svcNote: 'Servis {p}%' },
+        badge_spicy: 'Acı 🌶', badge_veg: 'Vegetarian 🌿', badge_chef: 'Şefdən', svcNote: 'Servis {p}%', kitchen: 'Mətbəx', bar: 'Bar' },
     en: { openMenu: 'Open menu', callWaiter: 'Call waiter', askBill: 'Ask for bill', cart: 'Cart', yourOrder: 'Your order', total: 'Total',
         sendOrder: 'Send order', orderHint: 'A waiter will confirm your order and pass it to the kitchen', service: 'Service', cancel: 'Cancel',
         search: 'Search dishes…', notFound: 'Nothing found', add: 'Add', commentPh: '💬 Note (no onion, not spicy…)', open: 'Open', closed: 'Closed',
@@ -428,7 +446,7 @@ const I18N = {
         tooMany: 'Too many requests, please wait', netErr: 'No connection to the restaurant', wait: 'Request already sent, please wait', empty: 'Cart is empty',
         stop: 'Sold out', left: 'Left', gpsTitle: 'Location needed', gpsText: 'Please allow location access to order: this protects the restaurant from fake orders.',
         far: 'You are too far from the restaurant. Orders are accepted inside only.', menuErr: 'Could not load the menu', badge_new: 'New', badge_hit: 'Bestseller',
-        badge_spicy: 'Spicy 🌶', badge_veg: 'Vegetarian 🌿', badge_chef: "Chef's choice", svcNote: 'Service {p}%' }
+        badge_spicy: 'Spicy 🌶', badge_veg: 'Vegetarian 🌿', badge_chef: "Chef's choice", svcNote: 'Service {p}%', kitchen: 'Kitchen', bar: 'Bar' }
 };
 
 // =====================================================================
@@ -581,21 +599,56 @@ function buildMenu() {
     const cfgCats = S.categories || {};
     ITEMS = MENU.filter(it => !((S.dishes || {})[it.id] || {}).hidden && !(cfgCats[it.category] || {}).hidden)
         .map(dishView).filter(d => !(d.stop && !S.features.showStopped));
-    const groups = {};
-    ITEMS.forEach(d => { (groups[d.cat] = groups[d.cat] || []).push(d); });
-    const mainOrder = { KUXNYA: 0, BAR: 1 };
-    CATS = Object.keys(groups).map(k => ({
-        key: k, title: tr((cfgCats[k] || {}).name, k), items: groups[k],
-        order: (cfgCats[k] || {}).order, main: mainOrder[groups[k][0].main] != null ? mainOrder[groups[k][0].main] : 2
-    })).sort((a, b) => {
+    // категория — внутри своего раздела (у кухни и бара бывает одинаковое имя, напр. ƏLAVƏLƏR);
+    // порядок — как прислал сервер (админка → «Порядок меню», как в терминале), а не по алфавиту
+    const groups = {}, first = {};
+    ITEMS.forEach((d, n) => { const k = secOf(d) + '|' + d.cat; if (!groups[k]) { groups[k] = []; first[k] = n; } groups[k].push(d); });
+    CATS = Object.keys(groups).map(k => {
+        const cat = k.slice(k.indexOf('|') + 1);
+        return { key: k, sec: k.slice(0, k.indexOf('|')), title: tr((cfgCats[cat] || {}).name, cat), items: groups[k], order: (cfgCats[cat] || {}).order, n: first[k] };
+    }).sort((a, b) => {
         const ao = a.order != null ? a.order : 1000, bo = b.order != null ? b.order : 1000;
-        return ao - bo || a.main - b.main || a.title.localeCompare(b.title);
+        return ao - bo || (a.sec === b.sec ? 0 : a.sec === 'KUXNYA' ? -1 : 1) || a.n - b.n;
     });
-    $('cats').innerHTML = CATS.map((c, i) => `<button class="cat ${i === 0 ? 'on' : ''}" data-i="${i}" onclick="goCat(${i})">${esc(c.title)}</button>`).join('');
-    $('sections').innerHTML = CATS.length ? CATS.map((c, i) => `<div class="section" id="sec-${i}"><h3>${esc(c.title)}</h3>
-        <div class="items ${window.LAYOUT}">${c.items.map(cardHtml).join('')}</div></div>`).join('') : `<div class="loader">${esc(t('notFound'))}</div>`;
-    setupSpy();
+    renderMenuView();
 }
+
+// ----- Кухня | Бар → плитки категорий → блюда одной категории (21.10, как в терминале) -----
+let SEC = 'KUXNYA', CAT = -1;   // открытый раздел и категория (-1 — плитки категорий)
+function secOf(d) { return d.main === 'BAR' ? 'BAR' : 'KUXNYA'; }
+function renderMenuView() {
+    if (!CATS.length) {
+        $('tiles').classList.add('hidden'); $('cats').classList.add('hidden'); $('seg').classList.add('hidden');
+        $('sections').innerHTML = MENU.length ? `<div class="loader">${esc(t('notFound'))}</div>` : $('sections').innerHTML;
+        return;
+    }
+    if (!CATS.some(c => c.sec === SEC)) SEC = CATS[0].sec;
+    $('seg').classList.toggle('hidden', !(CATS.some(c => c.sec === 'KUXNYA') && CATS.some(c => c.sec === 'BAR')));
+    document.querySelectorAll('#seg button').forEach(b => b.classList.toggle('on', b.dataset.sec === SEC));
+    const list = CATS.filter(c => c.sec === SEC);
+    const c = CATS[CAT];
+    if (!c || c.sec !== SEC) {
+        CAT = -1;
+        $('tiles').innerHTML = list.map(x => `<button class="tile" type="button" onclick="openCat(${CATS.indexOf(x)})"><b>${esc(x.title)}</b><small>${x.items.length}</small></button>`).join('');
+        $('tiles').classList.remove('hidden'); $('cats').classList.add('hidden'); $('sections').innerHTML = '';
+        return;
+    }
+    $('cats').innerHTML = list.map(x => { const i = CATS.indexOf(x); return `<button class="cat ${i === CAT ? 'on' : ''}" data-i="${i}" onclick="pickCat(${i})">${esc(x.title)}</button>`; }).join('');
+    $('cats').classList.remove('hidden'); $('tiles').classList.add('hidden');
+    $('sections').innerHTML = `<div class="section"><h3>${esc(c.title)}</h3><div class="items ${window.LAYOUT}">${c.items.map(cardHtml).join('')}</div></div>`;
+    const on = document.querySelector('.cat.on'); if (on) on.scrollIntoView({ inline: 'center', block: 'nearest' });
+}
+function menuState() { return { screen: 'menu', sec: SEC, cat: CAT }; }
+// раздел сменили сверху — обратно к плиткам этого раздела, без лишнего шага «назад»
+function setSection(sec) {
+    if (sec === SEC && CAT < 0) return;
+    SEC = sec; CAT = -1;
+    history.replaceState(menuState(), '');
+    renderMenuView(); window.scrollTo(0, 0);
+}
+function openCat(i) { CAT = i; history.pushState(menuState(), ''); renderMenuView(); window.scrollTo(0, 0); }
+// соседняя категория из строки сверху — без нового шага «назад» (назад — к плиткам)
+function pickCat(i) { if (i === CAT) return; CAT = i; history.replaceState(menuState(), ''); renderMenuView(); window.scrollTo(0, 0); }
 function cardHtml(d) {
     const q = cart[d.id] ? cart[d.id].qty : 0;
     // Без фото карточка просто текстовая — пустые заглушки выглядят непрофессионально
@@ -611,26 +664,6 @@ function cardHtml(d) {
 function qtyHtml(id, q) {
     return q > 0 ? `<span class="qty"><button onclick="chg('${id}',-1,event)">−</button><span>${q}</span><button class="plus" onclick="chg('${id}',1,event)">+</button></span>`
         : `<button class="add" onclick="chg('${id}',1,event)" aria-label="${esc(t('add'))}">+</button>`;
-}
-function goCat(i) {
-    const el = $('sec-' + i); if (!el) return;
-    spyPaused = true; setTimeout(() => spyPaused = false, 700);
-    window.scrollTo({ top: el.getBoundingClientRect().top + scrollY - document.querySelector('.topbar').offsetHeight - 4, behavior: 'smooth' });
-    markCat(i);
-}
-function markCat(i) {
-    document.querySelectorAll('.cat').forEach(b => b.classList.toggle('on', +b.dataset.i === i));
-    const b = document.querySelector(`.cat[data-i="${i}"]`);
-    if (b) b.scrollIntoView({ inline: 'center', block: 'nearest', behavior: 'smooth' });
-}
-let spyPaused = false, spyObs = null;
-function setupSpy() {
-    if (spyObs) spyObs.disconnect();
-    spyObs = new IntersectionObserver(es => {
-        if (spyPaused) return;
-        es.forEach(e => { if (e.isIntersecting) markCat(+e.target.id.replace('sec-', '')); });
-    }, { rootMargin: '-130px 0px -65% 0px' });
-    document.querySelectorAll('.section').forEach(s => spyObs.observe(s));
 }
 
 // =====================================================================
@@ -728,19 +761,29 @@ function doSearch(q) {
 function openSheet(id) {
     document.querySelectorAll('.sheet.show').forEach(s => s.classList.remove('show'));
     $('ov').classList.add('show'); $(id).classList.add('show');
-    if (!history.state || !history.state.sheet) history.pushState({ screen: history.state && history.state.screen, sheet: id }, '');
+    if (!history.state || !history.state.sheet) history.pushState(Object.assign({}, history.state, { sheet: id }), '');   // раздел и категория остаются
 }
 function hideSheets() { document.querySelectorAll('.sheet').forEach(s => s.classList.remove('show')); $('ov').classList.remove('show'); }
 function closeSheets() { if (history.state && history.state.sheet) history.back(); else hideSheets(); }
-function openMenu() {
+function openMenu(sec) {
+    if (sec === 'KUXNYA' || sec === 'BAR') SEC = sec;
+    CAT = -1;
     $('home').classList.add('hidden'); $('menu').classList.remove('hidden');
-    history.pushState({ screen: 'menu' }, '');
-    window.scrollTo(0, 0); updateCart();
+    history.pushState(menuState(), '');
+    renderMenuView(); window.scrollTo(0, 0); updateCart();
 }
 function showHome() { $('menu').classList.add('hidden'); $('home').classList.remove('hidden'); updateCart(); }
 window.addEventListener('popstate', e => {
     hideSheets();
-    if (e.state && e.state.screen === 'menu') { $('home').classList.add('hidden'); $('menu').classList.remove('hidden'); updateCart(); }
+    if (e.state && e.state.screen === 'menu') {
+        const back = !e.state.sheet && (e.state.sec !== SEC || (e.state.cat != null ? e.state.cat : -1) !== CAT);
+        if (e.state.sec) SEC = e.state.sec;
+        CAT = e.state.cat != null ? e.state.cat : -1;
+        const wasHidden = $('menu').classList.contains('hidden');
+        $('home').classList.add('hidden'); $('menu').classList.remove('hidden');
+        if (back || wasHidden) { renderMenuView(); window.scrollTo(0, 0); }
+        updateCart();
+    }
     else if (!e.state || !e.state.sheet) showHome();
 });
 
