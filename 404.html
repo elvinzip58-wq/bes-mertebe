@@ -306,7 +306,7 @@ html[data-tpl="wine-steak"] .section h3 {
 <section id="menu" class="hidden">
     <div class="topbar">
         <div class="topbar-row">
-            <button class="ibtn" onclick="history.back()">←</button>
+            <button class="ibtn" onclick="goHome()">←</button>
             <h2 id="menu-title"></h2>
             <button class="ibtn" onclick="openSearch()">🔍</button>
         </div>
@@ -646,7 +646,8 @@ function setSection(sec) {
     history.replaceState(menuState(), '');
     renderMenuView(); window.scrollTo(0, 0);
 }
-function openCat(i) { CAT = i; history.pushState(menuState(), ''); renderMenuView(); window.scrollTo(0, 0); }
+// внутри меню шаги не копятся: «←» и «назад» телефона — сразу на главный экран (22.10, владелец)
+function openCat(i) { CAT = i; history.replaceState(menuState(), ''); renderMenuView(); window.scrollTo(0, 0); }
 // соседняя категория из строки сверху — без нового шага «назад» (назад — к плиткам)
 function pickCat(i) { if (i === CAT) return; CAT = i; history.replaceState(menuState(), ''); renderMenuView(); window.scrollTo(0, 0); }
 function cardHtml(d) {
@@ -772,6 +773,7 @@ function openMenu(sec) {
     history.pushState(menuState(), '');
     renderMenuView(); window.scrollTo(0, 0); updateCart();
 }
+function goHome() { if (history.state && history.state.screen === 'menu') history.back(); else showHome(); }
 function showHome() { $('menu').classList.add('hidden'); $('home').classList.remove('hidden'); updateCart(); }
 window.addEventListener('popstate', e => {
     hideSheets();
