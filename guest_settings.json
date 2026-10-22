@@ -205,52 +205,52 @@
     "KABABLAR": {
       "photo": "photos/bm_c_kabab_p.jpg"
     },
-    "ƏT YEMƏKLƏRI": {
-      "photo": "photos/bm_c_et_1.jpg"
-    },
     "ŞORBALAR": {
       "photo": "photos/bm_c_sorba_1.jpg"
-    },
-    "MEYVELER": {
-      "photo": "photos/bm_c_meyve_1.jpg"
-    },
-    "SOSIS MƏMULATLARI": {
-      "photo": "photos/bm_c_sosis_p.jpg"
-    },
-    "PIVƏ ÜÇÜN MƏZƏLƏR": {
-      "photo": "photos/bm_c_meze_1.jpg"
     },
     "ŞƏRABLAR": {
       "photo": "photos/bm_c_serab_1.jpg"
     },
-    "SÜZMƏ PIVƏ": {
-      "photo": "photos/bm_c_pive_p.jpg"
-    },
     "ASSORTILƏR": {
       "photo": "photos/bm_c_assorti_p.jpg"
-    },
-    "TOYUQ YEMƏKLƏRI": {
-      "photo": "photos/bm_c_toyuq_p.jpg"
     },
     "SALATLAR": {
       "photo": "photos/bm_c_salat_p.jpg"
     },
-    "BALIQ YEMƏKLƏRI": {
-      "photo": "photos/bm_c_baliq_p.jpg"
-    },
-    "HISƏ VERILMIŞ BALIQLAR": {
-      "photo": "photos/bm_c_hise_p.jpg"
-    },
     "KOLBASALAR": {
       "photo": "photos/bm_c_kolbasa_p.jpg"
-    },
-    "PIVƏ": {
-      "photo": "photos/bm_c_pivebot_p.jpg"
     },
     "ARAQLAR": {
       "photo": "photos/bm_c_araq_p.jpg"
     },
-    "CAY": {
+    "ƏT YEMƏKLƏRİ": {
+      "photo": "photos/bm_c_et_1.jpg"
+    },
+    "MEYVƏLƏR": {
+      "photo": "photos/bm_c_meyve_1.jpg"
+    },
+    "SOSİS MƏMULATLARI": {
+      "photo": "photos/bm_c_sosis_p.jpg"
+    },
+    "PİVƏ ÜÇÜN MƏZƏLƏR": {
+      "photo": "photos/bm_c_meze_1.jpg"
+    },
+    "SÜZMƏ PİVƏ": {
+      "photo": "photos/bm_c_pive_p.jpg"
+    },
+    "TOYUQ YEMƏKLƏRİ": {
+      "photo": "photos/bm_c_toyuq_p.jpg"
+    },
+    "BALIQ YEMƏKLƏRİ": {
+      "photo": "photos/bm_c_baliq_p.jpg"
+    },
+    "HİSƏ VERİLMİŞ BALIQLAR": {
+      "photo": "photos/bm_c_hise_p.jpg"
+    },
+    "PİVƏ": {
+      "photo": "photos/bm_c_pivebot_p.jpg"
+    },
+    "ÇAY": {
       "photo": "photos/bm_c_cay_p.jpg"
     }
   },
