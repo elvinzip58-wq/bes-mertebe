@@ -22,7 +22,7 @@ img { display: block; }
 .hidden { display: none !important; }
 
 /* ===== Главная ===== */
-#home { max-width: 640px; margin: 0 auto; padding-bottom: calc(100px + var(--safe-b)); }
+#home { max-width: 640px; margin: 0 auto; padding-bottom: calc(100px + var(--safe-b)); position: relative; }
 .cover { height: 190px; background: var(--surface) center/cover no-repeat; position: relative; }
 .cover::after { content: ''; position: absolute; inset: 0; background: linear-gradient(to bottom, transparent 40%, var(--bg)); }
 .lang-switch { position: absolute; top: calc(12px + env(safe-area-inset-top)); right: 12px; z-index: 3; display: flex; gap: 4px;
@@ -272,6 +272,140 @@ html[data-tpl="wine-steak"] .section h3 {
     padding-bottom: 8px;
     letter-spacing: .3px;
 }
+
+/* ===== Интерьер и видео (галерея) — во всех шаблонах ===== */
+.gal-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+@media (min-width: 640px) { .gal-grid { grid-template-columns: repeat(3, 1fr); } }
+.gcard { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; cursor: pointer; display: flex; flex-direction: column; }
+.gmedia { position: relative; aspect-ratio: 4/3; background: #000; }
+.gmedia img, .gmedia video { width: 100%; height: 100%; object-fit: cover; display: block; }
+.gplay { position: absolute; left: 10px; bottom: 10px; width: 34px; height: 34px; border-radius: 50%; background: rgba(0,0,0,.55); color: #fff;
+    display: flex; align-items: center; justify-content: center; font-size: 13px; backdrop-filter: blur(6px); pointer-events: none; }
+.gtitle { padding: 12px 14px 14px; font-family: var(--font-head); font-weight: 600; font-size: 15px; line-height: 1.3; }
+.tile.gal-tile small, .cat.gal-cat { }
+#media-sheet { top: 0; max-width: none; background: #000; color: #fff; padding: env(safe-area-inset-top) 0 calc(16px + var(--safe-b)); max-height: none; height: auto; border-radius: 0; display: flex; flex-direction: column; overflow: hidden; }
+#media-sheet .grip { display: none; }
+#media-body { flex: 1; min-height: 0; display: flex; flex-direction: column; justify-content: center; }
+#media-body video, #media-body img { width: 100%; max-height: calc(100vh - 120px); object-fit: contain; background: #000; display: block; }
+#media-body .mtitle { padding: 14px 18px 0; font-size: 17px; font-weight: 700; text-align: center; }
+/* линейные значки (UI_ICONS) */
+.ic-svg { width: 21px; height: 21px; display: block; flex-shrink: 0; }
+.tb-search .ic-svg { width: 18px; height: 18px; }
+.mode-btn .ic-svg { width: 20px; height: 20px; }
+.totop { display: flex; align-items: center; justify-content: center; }
+.totop { position: fixed; left: 16px; bottom: calc(16px + var(--safe-b)); z-index: 45; width: 48px; height: 48px; border-radius: 50%; border: 1px solid var(--border);
+    background: var(--surface); color: var(--text); font-size: 20px; cursor: pointer; box-shadow: 0 8px 24px rgba(0,0,0,.25);
+    opacity: 0; transform: translateY(20px); pointer-events: none; transition: opacity .2s, transform .2s; }
+.totop.show { opacity: 1; transform: none; pointer-events: auto; }
+.cartbar.show ~ .totop { bottom: calc(86px + var(--safe-b)); }
+/* элементы «Витрины» в других шаблонах не видны */
+.cover-img, .cover-video, .mode-btn, .tb-logo, .tb-search, .tb-more, .r-rating, .big-btn small, .big-btn .bb-ch, .v-contacts { display: none; }
+.big-btn .bb-tx { display: flex; flex-direction: column; }
+
+/* ===== «Витрина» (22.10): фото/видео на весь экран, стеклянные карточки, плитки с фото ===== */
+@keyframes vZoom { from { transform: scale(1.02); } to { transform: scale(1.14) translate(-1.5%, -1%); } }
+@keyframes vUp { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: none; } }
+html[data-tpl="vitrina"] #home { max-width: none; min-height: 100vh; min-height: 100svh; padding-bottom: calc(36px + var(--safe-b)); position: relative; color: #fff; }
+html[data-tpl="vitrina"] .cover { position: fixed; inset: 0; height: auto; z-index: 0; overflow: hidden; background: #111 !important; }
+html[data-tpl="vitrina"] .cover::after { z-index: 1; background: linear-gradient(to bottom, rgba(0,0,0,.35) 0%, rgba(0,0,0,.45) 40%, rgba(0,0,0,.78) 100%); }
+html[data-tpl="vitrina"] .cover-img { display: block; position: absolute; inset: -2%; background: center/cover no-repeat;
+    background-image: radial-gradient(circle at 25% 20%, color-mix(in srgb, var(--accent) 55%, #7c2d12), transparent 60%), linear-gradient(160deg, #2a2420, #0d0d0f);
+    animation: vZoom 26s ease-in-out infinite alternate; }
+html[data-tpl="vitrina"] .cover-video { display: block; position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+html[data-tpl="vitrina"] .cover-video:not([src]) { display: none; }
+html[data-tpl="vitrina"] #home > .lang-switch, html[data-tpl="vitrina"] #home > .mode-btn { position: fixed; z-index: 5; }
+html[data-tpl="vitrina"] .mode-btn { display: flex; position: absolute; top: calc(12px + env(safe-area-inset-top)); left: 12px; width: 42px; height: 42px; border-radius: 50%;
+    border: none; background: rgba(0,0,0,.4); color: #fff; backdrop-filter: blur(10px); align-items: center; justify-content: center; font-size: 18px; cursor: pointer; }
+html[data-tpl="vitrina"] .brand { margin-top: 0; padding-top: calc(16vh + env(safe-area-inset-top)); z-index: 2; animation: vUp .7s ease both; }
+html[data-tpl="vitrina"] .logo { width: 124px; height: 124px; border: 3px solid rgba(255,255,255,.9); background: #fff; color: #111; box-shadow: 0 14px 40px rgba(0,0,0,.45); }
+html[data-tpl="vitrina"] .brand h1 { font-size: 32px; color: #fff; text-shadow: 0 2px 18px rgba(0,0,0,.5); }
+html[data-tpl="vitrina"] .brand p { color: rgba(255,255,255,.88); text-shadow: 0 1px 10px rgba(0,0,0,.5); }
+html[data-tpl="vitrina"] .r-rating { display: flex; justify-content: center; align-items: center; gap: 6px; margin-top: 12px; font-size: 15px; font-weight: 700; color: #fff; }
+html[data-tpl="vitrina"] .r-rating.hidden { display: none; }
+html[data-tpl="vitrina"] .r-rating small { font-weight: 500; color: rgba(255,255,255,.8); font-size: 14px; }
+html[data-tpl="vitrina"] .status-pill, html[data-tpl="vitrina"] .brand .svc-note { background: rgba(255,255,255,.14); color: #fff; backdrop-filter: blur(10px); }
+html[data-tpl="vitrina"] .table-chip { color: rgba(255,255,255,.85); }
+html[data-tpl="vitrina"] .home-actions { position: relative; z-index: 2; max-width: 520px; margin: 0 auto; padding-top: 28px; }
+html[data-tpl="vitrina"] .home-actions > * { animation: vUp .7s ease both; }
+html[data-tpl="vitrina"] .home-actions > :nth-child(2) { animation-delay: .1s; }
+html[data-tpl="vitrina"] .home-actions > :nth-child(3) { animation-delay: .2s; }
+html[data-tpl="vitrina"] .home-actions > :nth-child(4) { animation-delay: .3s; }
+html[data-tpl="vitrina"] .big-btn, html[data-tpl="vitrina"] #home .act, html[data-tpl="vitrina"] .v-contacts {
+    background: rgba(255,255,255,.13); color: #fff; border: 1px solid rgba(255,255,255,.2); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); box-shadow: none; }
+html[data-tpl="vitrina"] .big-btn { justify-content: flex-start; text-align: left; padding: 16px 18px; gap: 14px; border-radius: 20px; font-size: 18px; }
+html[data-tpl="vitrina"] .big-btn .bb-ic { width: 46px; height: 46px; border-radius: 14px; background: rgba(255,255,255,.18); display: flex; align-items: center; justify-content: center; font-size: 22px; flex-shrink: 0; }
+html[data-tpl="vitrina"] .big-btn .bb-tx { flex: 1; min-width: 0; }
+html[data-tpl="vitrina"] .big-btn small { display: block; font-size: 13px; font-weight: 500; color: rgba(255,255,255,.78); margin-top: 3px; }
+html[data-tpl="vitrina"] .big-btn .bb-ch { display: block; font-size: 26px; font-weight: 400; opacity: .85; }
+html[data-tpl="vitrina"] #home .act { border-radius: 18px; }
+html[data-tpl="vitrina"] #home .act .ic { background: rgba(255,255,255,.18); color: #fff; }
+html[data-tpl="vitrina"] #home .act .tx small, html[data-tpl="vitrina"] #home .act .chev { color: rgba(255,255,255,.75); }
+html[data-tpl="vitrina"] .v-contacts { display: block; border-radius: 20px; padding: 16px 18px; margin-top: 10px; }
+html[data-tpl="vitrina"] .v-contacts.hidden { display: none; }
+.v-contacts h4 { display: flex; align-items: center; gap: 10px; font-size: 16px; font-weight: 700; margin-bottom: 14px; }
+.v-soc { display: flex; justify-content: center; gap: 12px; margin-bottom: 8px; }
+.v-soc a { width: 48px; height: 48px; border-radius: 50%; background: rgba(255,255,255,.16); color: #fff; display: flex; align-items: center; justify-content: center; text-decoration: none; font-size: 19px; }
+.v-soc a svg { width: 22px; height: 22px; }
+.v-row { display: flex; justify-content: space-between; gap: 14px; padding: 9px 0; font-size: 14px; border-top: 1px solid rgba(255,255,255,.12); color: #fff; text-decoration: none; }
+.v-row span:first-child { color: rgba(255,255,255,.7); flex-shrink: 0; }
+.v-row span:last-child { text-align: right; font-weight: 600; }
+html[data-tpl="vitrina"] .socials { display: none; }
+html[data-tpl="vitrina"] .foot { position: relative; z-index: 2; color: rgba(255,255,255,.6); }
+
+/* меню «Витрины» */
+html[data-tpl="vitrina"] .topbar { background: color-mix(in srgb, var(--bg) 94%, transparent); box-shadow: 0 6px 20px rgba(0,0,0,.06); border-bottom: none; padding-left: 10px; padding-right: 10px; }
+html[data-tpl="vitrina"] .topbar-row { gap: 8px; }
+html[data-tpl="vitrina"] .topbar h2, html[data-tpl="vitrina"] .tb-oldsearch { display: none; }
+html[data-tpl="vitrina"] .topbar .ibtn { width: 42px; height: 42px; border-radius: 50%; background: var(--surface); border: 1px solid var(--border); flex-shrink: 0; font-size: 18px; }
+html[data-tpl="vitrina"] .tb-logo { display: flex; width: 42px; height: 42px; border-radius: 50%; overflow: hidden; background: #fff; flex-shrink: 0; align-items: center; justify-content: center;
+    font-weight: 800; color: #111; border: 1px solid var(--border); }
+html[data-tpl="vitrina"] .tb-logo img { width: 100%; height: 100%; object-fit: cover; }
+html[data-tpl="vitrina"] .tb-search i { display: contents; }
+html[data-tpl="vitrina"] .tb-search { display: flex; flex: 1; min-width: 0; height: 42px; align-items: center; gap: 8px; padding: 0 14px; border-radius: 999px; border: 1.5px solid var(--border);
+    background: var(--surface); color: var(--muted); font-size: 15px; cursor: pointer; text-align: left; }
+html[data-tpl="vitrina"] .tb-search span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+html[data-tpl="vitrina"] .tb-more, html[data-tpl="vitrina"] .topbar .mode-btn { display: flex; position: static; background: var(--surface); color: var(--text); backdrop-filter: none; border: 1px solid var(--border); }
+html[data-tpl="vitrina"] .seg { background: var(--surface); }
+html[data-tpl="vitrina"] .tiles { gap: 14px; padding: 16px; }
+html[data-tpl="vitrina"] .tile { position: relative; overflow: hidden; aspect-ratio: 4/5; min-height: 0; border: none; border-radius: 22px; padding: 16px; justify-content: flex-end; color: #fff;
+    background: var(--ph, none) center/cover no-repeat, linear-gradient(150deg, color-mix(in srgb, var(--accent) 70%, #555), color-mix(in srgb, var(--accent) 90%, #000));
+    box-shadow: 0 10px 26px rgba(0,0,0,.14); }
+html[data-tpl="vitrina"] .tile::before { content: ''; position: absolute; inset: 0; background: linear-gradient(to bottom, rgba(0,0,0,0) 35%, rgba(0,0,0,.72)); }
+html[data-tpl="vitrina"] .tile > * { position: relative; }
+html[data-tpl="vitrina"] .tile b { font-size: 20px; font-weight: 800; line-height: 1.15; text-shadow: 0 2px 10px rgba(0,0,0,.4); }
+html[data-tpl="vitrina"] .tile small { background: none; color: rgba(255,255,255,.85); padding: 0; font-weight: 500; font-size: 13px; }
+html[data-tpl="vitrina"] .cat { position: relative; overflow: hidden; border: none; padding: 9px 16px; border-radius: 12px; color: #fff; font-weight: 700;
+    background: linear-gradient(rgba(0,0,0,.45), rgba(0,0,0,.45)), var(--ph, none) center/cover no-repeat, color-mix(in srgb, var(--accent) 80%, #444); }
+html[data-tpl="vitrina"] .cat.on { box-shadow: 0 0 0 2px var(--bg), 0 0 0 4px var(--text); background: linear-gradient(rgba(0,0,0,.25), rgba(0,0,0,.25)), var(--ph, none) center/cover no-repeat, var(--text); color: #fff; }
+html[data-tpl="vitrina"] #menu .svc-note { display: flex; width: auto; margin: 12px 16px 0; padding: 10px 14px; border-radius: 14px; white-space: normal;
+    background: var(--surface); color: var(--muted); border: 1px solid var(--border); font-weight: 600; }
+html[data-tpl="vitrina"] #menu .svc-note.hidden { display: none; }
+html[data-tpl="vitrina"] .section h3 { font-size: 22px; }
+html[data-tpl="vitrina"] .items.grid { gap: 14px; }
+html[data-tpl="vitrina"] .items .card { border: none; box-shadow: 0 6px 22px rgba(0,0,0,.07); border-radius: 22px; }
+html[data-tpl="vitrina"] .items.grid .card .ph { aspect-ratio: 4/3; }
+html[data-tpl="vitrina"] .items.grid .card .info { padding: 14px 14px 14px; }
+html[data-tpl="vitrina"] .card .name { font-weight: 600; font-size: 15.5px; }
+html[data-tpl="vitrina"] .price { color: var(--text); font-size: 17px; }
+html[data-tpl="vitrina"] .add, html[data-tpl="vitrina"] .qty button.plus { width: 40px; height: 40px; background: var(--text); color: var(--bg); font-weight: 400; }
+html[data-tpl="vitrina"] .gcard { border: none; border-radius: 22px; box-shadow: 0 6px 22px rgba(0,0,0,.07); }
+html[data-tpl="vitrina"] .cartbar { background: var(--text); color: var(--bg); border-radius: 20px; }
+html[data-tpl="vitrina"] .totop { background: var(--text); color: var(--bg); border: none; }
+html[data-tpl="vitrina"][data-mode="dark"] .items .card, html[data-tpl="vitrina"][data-mode="dark"] .gcard { box-shadow: none; border: 1px solid var(--border); }
+html[data-tpl="vitrina"] .lang-pick { display: flex; gap: 8px; margin-top: 4px; }
+.lang-pick button { flex: 1; padding: 12px; border-radius: 14px; border: 1px solid var(--border); background: var(--bg); color: var(--text); font-weight: 700; cursor: pointer; }
+.lang-pick button.on { background: var(--accent); color: var(--accent-text); border-color: var(--accent); }
+/* светлая тема «Витрины» — светлые карточки на главной (видно, что 🌙/☀️ сработала) */
+html[data-tpl="vitrina"][data-mode="light"] .big-btn, html[data-tpl="vitrina"][data-mode="light"] #home .act, html[data-tpl="vitrina"][data-mode="light"] .v-contacts {
+    background: rgba(255,255,255,.86); color: #141416; border-color: rgba(255,255,255,.6); }
+html[data-tpl="vitrina"][data-mode="light"] .big-btn .bb-ic, html[data-tpl="vitrina"][data-mode="light"] #home .act .ic, html[data-tpl="vitrina"][data-mode="light"] .v-soc a { background: rgba(0,0,0,.06); color: #141416; }
+html[data-tpl="vitrina"][data-mode="light"] .big-btn small, html[data-tpl="vitrina"][data-mode="light"] #home .act .tx small, html[data-tpl="vitrina"][data-mode="light"] #home .act .chev { color: #6e6e76; }
+html[data-tpl="vitrina"][data-mode="light"] .v-row { color: #141416; border-top-color: rgba(0,0,0,.08); }
+html[data-tpl="vitrina"][data-mode="light"] .v-row span:first-child { color: #6e6e76; }
+html[data-tpl="vitrina"][data-mode="light"] #home > .mode-btn, html[data-tpl="vitrina"][data-mode="light"] #home > .lang-switch { background: rgba(255,255,255,.86); color: #141416; }
+html[data-tpl="vitrina"][data-mode="light"] #home > .lang-switch button { color: #141416; }
+html[data-tpl="vitrina"][data-mode="light"] #home > .lang-switch button.on { background: #141416; color: #fff; }
+@media (prefers-reduced-motion: reduce) { html[data-tpl="vitrina"] .cover-img, html[data-tpl="vitrina"] .brand, html[data-tpl="vitrina"] .home-actions > * { animation: none; } }
 </style>
 </head>
 <body>
@@ -279,24 +413,29 @@ html[data-tpl="wine-steak"] .section h3 {
 <!-- ===== ГЛАВНАЯ ===== -->
 <section id="home">
     <div class="cover" id="cover">
-        <div class="lang-switch" id="lang-switch"></div>
+        <div class="cover-img" id="cover-img"></div>
+        <video class="cover-video" id="cover-video" muted loop playsinline autoplay preload="auto" aria-hidden="true"></video>
     </div>
+    <button class="mode-btn" type="button" onclick="toggleMode()" aria-label="Тема"></button>
+    <div class="lang-switch" id="lang-switch"></div>
     <div class="brand">
         <div class="logo" id="logo"></div>
         <h1 id="r-name"></h1>
         <p id="r-desc"></p>
+        <div class="r-rating hidden" id="r-rating"></div>
         <div class="status-pill hidden" id="r-status"><i></i><span></span></div>
         <div class="table-chip" id="table-chip"></div>
         <div class="svc-note hidden" id="svc-home"></div>
     </div>
     <div class="home-actions">
         <!-- одна кнопка; «Кухня | Бар» — уже внутри меню (21.10, владелец) -->
-        <button class="big-btn" onclick="openMenu()">🍽️ <span data-t="openMenu"></span></button>
+        <button class="big-btn" onclick="openMenu()"><span class="bb-ic">🍽️</span><span class="bb-tx"><span data-t="openMenu"></span><small data-t="menuSub"></small></span><span class="bb-ch">›</span></button>
         <div class="act-row" id="service-row">
             <button class="act" id="btn-waiter" onclick="askService('waiter')"><div class="ic">🛎️</div><div class="tx"><b data-t="callWaiter"></b></div></button>
             <button class="act" id="btn-bill" onclick="askService('bill')"><div class="ic">🧾</div><div class="tx"><b data-t="askBill"></b></div></button>
         </div>
         <div id="info-acts"></div>
+        <div class="v-contacts hidden" id="v-contacts"></div>
     </div>
     <div class="socials" id="socials"></div>
     <div class="foot" id="foot"></div>
@@ -306,9 +445,13 @@ html[data-tpl="wine-steak"] .section h3 {
 <section id="menu" class="hidden">
     <div class="topbar">
         <div class="topbar-row">
-            <button class="ibtn" onclick="goHome()">←</button>
+            <button class="ibtn" onclick="goHome()" aria-label="Назад" data-ic="back"></button>
+            <div class="tb-logo" id="tb-logo"></div>
             <h2 id="menu-title"></h2>
-            <button class="ibtn" onclick="openSearch()">🔍</button>
+            <button class="tb-search" type="button" onclick="openSearch()"><i data-ic="search"></i><span data-t="search"></span></button>
+            <button class="ibtn tb-oldsearch" onclick="openSearch()" aria-label="Поиск" data-ic="search"></button>
+            <button class="ibtn tb-more" type="button" onclick="openMore()" aria-label="Ещё" data-ic="menu"></button>
+            <button class="ibtn mode-btn" type="button" onclick="toggleMode()" aria-label="Тема"></button>
         </div>
         <div class="seg" id="seg">
             <button type="button" data-sec="KUXNYA" onclick="setSection('KUXNYA')">🍽️ <span data-t="kitchen"></span></button>
@@ -323,6 +466,7 @@ html[data-tpl="wine-steak"] .section h3 {
 
 <button class="cartbar" id="cartbar" onclick="openCart()"><span class="cnt" id="cart-cnt">0</span><span data-t="cart"></span><span id="cart-sum">0 ₼</span></button>
 <button class="fab hidden" id="fab" onclick="openSheet('service-sheet')">🛎️</button>
+<button class="totop" id="totop" type="button" onclick="window.scrollTo({ top: 0, behavior: 'smooth' })" aria-label="Наверх" data-ic="up"></button>
 
 <!-- ===== ЛИСТЫ ===== -->
 <div class="ov" id="ov" onclick="closeSheets()"></div>
@@ -370,6 +514,14 @@ html[data-tpl="wine-steak"] .section h3 {
     <div class="sheet-foot"><button class="btn" onclick="sendReview()" data-t="send"></button></div>
 </div>
 
+<div class="sheet" id="media-sheet"><div class="grip"></div><div id="media-body"></div></div>
+
+<div class="sheet" id="more-sheet">
+    <div class="grip"></div>
+    <h2 id="more-title"></h2>
+    <div id="more-body" style="display:flex; flex-direction:column; gap:10px;"></div>
+</div>
+
 <div class="sheet" id="gps-sheet">
     <div class="grip"></div>
     <h2>📍 <span data-t="gpsTitle"></span></h2>
@@ -394,14 +546,18 @@ const TEMPLATES = {
     'emerald-lounge': { bg: '#0b1915', surface: '#132a23', text: '#f2f7f5', muted: '#8faea3', accent: '#e5b869', accentText: '#0b1915', border: 'rgba(229,184,105,.18)', font: 'elegant', layout: 'photo', radius: 18 },
     'wine-steak':     { bg: '#160d0f', surface: '#231518', text: '#faf5f5', muted: '#b59b9f', accent: '#d96b43', accentText: '#160d0f', border: 'rgba(217,107,67,.20)', font: 'serif', layout: 'photo', radius: 14 },
     'caspian-breeze': { bg: '#f2f7fb', surface: '#ffffff', text: '#0f2942', muted: '#5c768d', accent: '#0273ae', accentText: '#ffffff', border: 'rgba(2,115,174,.12)', font: 'rounded', layout: 'grid', radius: 20 },
-    'street-drive':   { bg: '#111318', surface: '#1b1f27', text: '#ffffff', muted: '#9ca3af', accent: '#ff3b5c', accentText: '#111318', border: 'rgba(255,255,255,.09)', font: 'condensed', layout: 'grid', radius: 18 }
+    'street-drive':   { bg: '#111318', surface: '#1b1f27', text: '#ffffff', muted: '#9ca3af', accent: '#ff3b5c', accentText: '#111318', border: 'rgba(255,255,255,.09)', font: 'condensed', layout: 'grid', radius: 18 },
+    'vitrina':        { bg: '#f3f3f5', surface: '#ffffff', text: '#141416', muted: '#6e6e76', accent: '#1c1c1e', accentText: '#ffffff', border: 'rgba(0,0,0,.07)', font: 'modern', layout: 'grid', radius: 20 }
 };
+// «Витрина» — у гостя есть тёмная тема (кнопка 🌙); свои цвета админа — только для светлой, акцент — для обеих
+const VITRINA_DARK = { bg: '#0e0e10', surface: '#1b1b1e', text: '#f4f4f6', muted: '#a1a1a8', accent: '#f4f4f6', accentText: '#111113', border: 'rgba(255,255,255,.09)' };
 const FONTS = {
     system:    { body: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif', head: null, gf: null },
     serif:     { body: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif', head: '"Playfair Display", Georgia, serif', gf: 'Playfair+Display:wght@600;800' },
     rounded:   { body: '"Nunito", -apple-system, "Segoe UI", sans-serif', head: '"Nunito", -apple-system, sans-serif', gf: 'Nunito:wght@400;600;700;800' },
     elegant:   { body: '"Inter", -apple-system, "Segoe UI", sans-serif', head: '"Cormorant Garamond", Georgia, serif', gf: 'Cormorant+Garamond:wght@600;700&family=Inter:wght@400;600;700' },
-    condensed: { body: '-apple-system, "Segoe UI", Roboto, Arial, sans-serif', head: '"Oswald", "Arial Narrow", sans-serif', gf: 'Oswald:wght@500;700' }
+    condensed: { body: '-apple-system, "Segoe UI", Roboto, Arial, sans-serif', head: '"Oswald", "Arial Narrow", sans-serif', gf: 'Oswald:wght@500;700' },
+    modern:    { body: '"Inter", -apple-system, "Segoe UI", Roboto, sans-serif', head: '"Inter", -apple-system, sans-serif', gf: 'Inter:wght@400;500;600;700;800' }
 };
 
 // =====================================================================
@@ -420,7 +576,9 @@ const I18N = {
         tooMany: 'Слишком много запросов, подождите', netErr: 'Нет связи с рестораном', wait: 'Запрос уже отправлен, подождите', empty: 'Корзина пуста',
         stop: 'Нет в наличии', left: 'Осталось', gpsTitle: 'Нужна геолокация', gpsText: 'Разрешите доступ к местоположению, чтобы сделать заказ: так мы защищаем ресторан от ложных заказов.',
         far: 'Вы слишком далеко от ресторана. Заказы принимаются только внутри.', menuErr: 'Не удалось загрузить меню', badge_new: 'Новинка', badge_hit: 'Хит',
-        badge_spicy: 'Острое 🌶', badge_veg: 'Вегетарианское 🌿', badge_chef: 'От шефа', svcNote: 'Сервис {p}%', kitchen: 'Кухня', bar: 'Бар' },
+        badge_spicy: 'Острое 🌶', badge_veg: 'Вегетарианское 🌿', badge_chef: 'От шефа', svcNote: 'Сервис {p}%', kitchen: 'Кухня', bar: 'Бар',
+        menuSub: 'Блюда и напитки нашей кухни', contactUs: 'Связаться с нами', phone: 'Телефон', address: 'Адрес', interior: 'Интерьер и видео',
+        videos: 'Видео', photos: 'Фото', language: 'Язык', dishes1: 'блюдо', dishes2: 'блюда', dishes5: 'блюд', rev1: 'отзыв', rev2: 'отзыва', rev5: 'отзывов' },
     az: { openMenu: 'Menyunu aç', callWaiter: 'Ofisiantı çağır', askBill: 'Hesabı istə', cart: 'Səbət', yourOrder: 'Sifarişiniz', total: 'Cəmi',
         sendOrder: 'Sifarişi göndər', orderHint: 'Ofisiant sifarişi təsdiqləyib mətbəxə ötürəcək', service: 'Xidmət', cancel: 'Ləğv et',
         search: 'Yemək axtar…', notFound: 'Heç nə tapılmadı', add: 'Əlavə et', commentPh: '💬 Qeyd (soğansız, acısız…)', open: 'Açıqdır', closed: 'Bağlıdır',
@@ -433,7 +591,9 @@ const I18N = {
         tooMany: 'Çox sorğu, bir az gözləyin', netErr: 'Restoranla əlaqə yoxdur', wait: 'Sorğu artıq göndərilib, gözləyin', empty: 'Səbət boşdur',
         stop: 'Bitib', left: 'Qalıb', gpsTitle: 'Məkan lazımdır', gpsText: 'Sifariş üçün məkana icazə verin: bu, restoranı saxta sifarişlərdən qoruyur.',
         far: 'Restorandan çox uzaqdasınız. Sifarişlər yalnız içəridə qəbul olunur.', menuErr: 'Menyu yüklənmədi', badge_new: 'Yeni', badge_hit: 'Hit',
-        badge_spicy: 'Acı 🌶', badge_veg: 'Vegetarian 🌿', badge_chef: 'Şefdən', svcNote: 'Servis {p}%', kitchen: 'Mətbəx', bar: 'Bar' },
+        badge_spicy: 'Acı 🌶', badge_veg: 'Vegetarian 🌿', badge_chef: 'Şefdən', svcNote: 'Servis {p}%', kitchen: 'Mətbəx', bar: 'Bar',
+        menuSub: 'Mətbəximizin yemək və içkiləri', contactUs: 'Bizimlə əlaqə', phone: 'Telefon', address: 'Ünvan', interior: 'İnteryer və videolar',
+        videos: 'Videolar', photos: 'Şəkillər', language: 'Dil', dishes1: 'yemək', dishes2: 'yemək', dishes5: 'yemək', rev1: 'rəy', rev2: 'rəy', rev5: 'rəy' },
     en: { openMenu: 'Open menu', callWaiter: 'Call waiter', askBill: 'Ask for bill', cart: 'Cart', yourOrder: 'Your order', total: 'Total',
         sendOrder: 'Send order', orderHint: 'A waiter will confirm your order and pass it to the kitchen', service: 'Service', cancel: 'Cancel',
         search: 'Search dishes…', notFound: 'Nothing found', add: 'Add', commentPh: '💬 Note (no onion, not spicy…)', open: 'Open', closed: 'Closed',
@@ -446,7 +606,9 @@ const I18N = {
         tooMany: 'Too many requests, please wait', netErr: 'No connection to the restaurant', wait: 'Request already sent, please wait', empty: 'Cart is empty',
         stop: 'Sold out', left: 'Left', gpsTitle: 'Location needed', gpsText: 'Please allow location access to order: this protects the restaurant from fake orders.',
         far: 'You are too far from the restaurant. Orders are accepted inside only.', menuErr: 'Could not load the menu', badge_new: 'New', badge_hit: 'Bestseller',
-        badge_spicy: 'Spicy 🌶', badge_veg: 'Vegetarian 🌿', badge_chef: "Chef's choice", svcNote: 'Service {p}%', kitchen: 'Kitchen', bar: 'Bar' }
+        badge_spicy: 'Spicy 🌶', badge_veg: 'Vegetarian 🌿', badge_chef: "Chef's choice", svcNote: 'Service {p}%', kitchen: 'Kitchen', bar: 'Bar',
+        menuSub: 'Dishes and drinks from our kitchen', contactUs: 'Contact us', phone: 'Phone', address: 'Address', interior: 'Interior & videos',
+        videos: 'Videos', photos: 'Photos', language: 'Language', dishes1: 'dish', dishes2: 'dishes', dishes5: 'dishes', rev1: 'review', rev2: 'reviews', rev5: 'reviews' }
 };
 
 // =====================================================================
@@ -460,6 +622,17 @@ const SOC_ICONS = {
     facebook: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M13.5 21v-7.5h2.6l.4-3h-3V8.6c0-.9.3-1.5 1.5-1.5h1.6V4.4c-.3 0-1.2-.1-2.3-.1-2.3 0-3.8 1.4-3.8 3.9v2.3H8v3h2.5V21h3z"/></svg>',
     whatsapp: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 20.5l1.3-4.3A8.5 8.5 0 1 1 8 19.3z"/><path d="M9 8.5c0 3.3 3.2 6.5 6.5 6.5l1-1.5-2-1-1 .8c-1-.4-2.4-1.8-2.8-2.8l.8-1-1-2z" fill="currentColor" stroke="none"/></svg>'
 };
+// Линейные значки шапки: одинаковая толщина, цвет — как у текста (вместо эмодзи 🔍 ☰ 🌙 ☀️)
+const UI_ICONS = {
+    back: '<path d="M19 12H5"/><path d="M11 18l-6-6 6-6"/>',
+    search: '<circle cx="11" cy="11" r="7"/><path d="M20 20l-4.2-4.2"/>',
+    menu: '<path d="M4 7h16"/><path d="M4 12h16"/><path d="M4 17h16"/>',
+    moon: '<path d="M20.5 14.5A8.5 8.5 0 0 1 9.5 3.5a8.5 8.5 0 1 0 11 11z"/>',
+    sun: '<circle cx="12" cy="12" r="4"/><path d="M12 2.5v2M12 19.5v2M4.6 4.6l1.4 1.4M18 18l1.4 1.4M2.5 12h2M19.5 12h2M4.6 19.4L6 18M18 6l1.4-1.4"/>',
+    up: '<path d="M12 19V5"/><path d="M6 11l6-6 6 6"/>'
+};
+function uiIcon(k) { return '<svg class="ic-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + UI_ICONS[k] + '</svg>'; }
+document.querySelectorAll('[data-ic]').forEach(el => { el.innerHTML = uiIcon(el.dataset.ic); });
 const params = new URLSearchParams(location.search);
 const IS_PREVIEW = params.get('preview') === '1';
 let S = null;               // настройки (guest_settings.json)
@@ -486,15 +659,36 @@ function safeUrl(u) { u = String(u || ''); return /^(https?:|tel:|mailto:|photos
 function t(k) { return (I18N[lang] && I18N[lang][k]) || I18N.ru[k] || k; }
 function money(x) { return (Math.round((+x || 0) * 100) / 100).toLocaleString('ru-RU', { maximumFractionDigits: 2 }) + ' ₼'; }
 function tr(obj, fallback) { return (obj && (obj[lang] || obj.ru || obj.az || obj.en)) || fallback || ''; }
+// «5 блюд», «2 отзыва»: русские окончания, в az/en — одна-две формы
+function plural(n, k) {
+    const a = n % 10, b = n % 100;
+    const f = lang !== 'ru' ? (n === 1 ? 1 : 5) : (a === 1 && b !== 11 ? 1 : a >= 2 && a <= 4 && (b < 12 || b > 14) ? 2 : 5);
+    return n + ' ' + t(k + f);
+}
+const IS_V = () => !!S && S.template === 'vitrina';
 function toast(m, ms) { const el = $('toast'); el.textContent = m; el.classList.add('show'); clearTimeout(el._h); el._h = setTimeout(() => el.classList.remove('show'), ms || 2800); }
 
 // =====================================================================
 //  ПРИМЕНЕНИЕ ШАБЛОНА
 // =====================================================================
+function vMode() {
+    let m = null;
+    try { m = localStorage.getItem('qr_mode'); } catch (e) {}
+    if (m !== 'dark' && m !== 'light') m = window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    return m;
+}
+function toggleMode() {
+    try { localStorage.setItem('qr_mode', vMode() === 'dark' ? 'light' : 'dark'); } catch (e) {}
+    applyTheme(); renderMenuView();
+}
 function applyTheme() {
     const base = TEMPLATES[S.template] || TEMPLATES['dark-pub'];
     document.documentElement.dataset.tpl = (S && TEMPLATES[S.template]) ? S.template : 'dark-pub';
-    const th = Object.assign({}, base, S.theme || {});
+    let th = Object.assign({}, base, S.theme || {});
+    const mode = IS_V() ? vMode() : '';
+    document.documentElement.dataset.mode = mode;
+    if (mode === 'dark') th = Object.assign({}, th, VITRINA_DARK, (S.theme || {}).accent ? { accent: S.theme.accent, accentText: S.theme.accentText || VITRINA_DARK.accentText } : {});
+    document.querySelectorAll('.mode-btn').forEach(b => { b.innerHTML = uiIcon(mode === 'dark' ? 'sun' : 'moon'); b.setAttribute('aria-label', mode === 'dark' ? 'Светлая тема' : 'Тёмная тема'); });
     const r = document.documentElement.style;
     r.setProperty('--bg', th.bg); r.setProperty('--surface', th.surface); r.setProperty('--text', th.text); r.setProperty('--muted', th.muted);
     r.setProperty('--accent', th.accent); r.setProperty('--accent-text', th.accentText); r.setProperty('--border', th.border || 'rgba(127,127,127,.15)');
@@ -515,7 +709,17 @@ function applyTheme() {
 function renderHome() {
     const i = S.info;
     document.title = i.name || 'Меню';
-    $('cover').style.backgroundImage = safeUrl(i.cover) ? `url("${safeUrl(i.cover)}")` : '';
+    const coverUrl = safeUrl(i.cover);
+    $('cover').style.backgroundImage = coverUrl && !IS_V() ? `url("${coverUrl}")` : '';
+    $('cover-img').style.backgroundImage = coverUrl ? `url("${coverUrl}")` : '';
+    // видео на весь экран — только «Витрина»; фото обложки — пока видео грузится
+    const vid = $('cover-video'), vUrl = IS_V() ? safeUrl(i.coverVideo) : '';
+    if (vUrl) { if (vid.getAttribute('src') !== vUrl) { vid.poster = coverUrl || ''; vid.src = vUrl; vid.muted = true; vid.play().catch(() => {}); } }
+    else if (vid.hasAttribute('src')) { vid.pause(); vid.removeAttribute('src'); vid.load(); }
+    $('tb-logo').innerHTML = safeUrl(i.logo) ? `<img src="${esc(safeUrl(i.logo))}" alt="">` : esc((i.name || 'M').trim().charAt(0).toUpperCase());
+    const rt = i.rating;
+    $('r-rating').classList.toggle('hidden', !(rt && rt.count >= 5 && rt.avg >= 4));
+    if (rt) $('r-rating').innerHTML = `⭐ ${String(rt.avg.toFixed(1)).replace('.', lang === 'en' ? '.' : ',')} <small>(${esc(plural(rt.count, 'rev'))})</small>`;
     const logo = $('logo');
     logo.innerHTML = safeUrl(i.logo) ? `<img src="${esc(safeUrl(i.logo))}" style="width:100%;height:100%;border-radius:50%;object-fit:cover">` : esc((i.name || 'M').trim().charAt(0).toUpperCase());
     $('r-name').textContent = i.name || '';
@@ -543,6 +747,26 @@ function renderHome() {
     else if (i.address) acts += `<div class="act"><div class="ic">📍</div><div class="tx"><b>${esc(i.address)}</b></div></div>`;
     if (i.phone) acts += `<a class="act" href="tel:${esc(i.phone.replace(/[^\d+]/g, ''))}"><div class="ic">📞</div><div class="tx"><b>${esc(t('call'))}</b><small>${esc(i.phone)}</small></div><span class="chev">›</span></a>`;
     if (S.features.reviews) acts += `<button class="act" onclick="openReview()"><div class="ic">⭐</div><div class="tx"><b>${esc(t('review'))}</b></div><span class="chev">›</span></button>`;
+    // «Витрина»: адрес, телефон, соцсети — одной карточкой «Связаться с нами»
+    if (IS_V()) {
+        acts = '';
+        if (i.wifiPassword) acts += `<button class="act" onclick="copyWifi()"><div class="ic">📶</div><div class="tx"><b>${esc(t('wifi'))}${i.wifiName ? ': ' + esc(i.wifiName) : ''}</b><small>${esc(i.wifiPassword)}</small></div><span class="chev">⧉</span></button>`;
+        if (S.features.reviews) acts += `<button class="act" onclick="openReview()"><div class="ic">⭐</div><div class="tx"><b>${esc(t('review'))}</b></div><span class="chev">›</span></button>`;
+        const tel = i.phone ? 'tel:' + i.phone.replace(/[^\d+]/g, '') : '';
+        let ic = '';
+        if (safeUrl(i.facebook)) ic += `<a href="${esc(safeUrl(i.facebook))}" target="_blank" rel="noopener" aria-label="Facebook">${SOC_ICONS.facebook}</a>`;
+        if (safeUrl(i.instagram)) ic += `<a href="${esc(safeUrl(i.instagram))}" target="_blank" rel="noopener" aria-label="Instagram">${SOC_ICONS.instagram}</a>`;
+        if (safeUrl(i.mapsUrl)) ic += `<a href="${esc(safeUrl(i.mapsUrl))}" target="_blank" rel="noopener" aria-label="${esc(t('map'))}">📍</a>`;
+        if (safeUrl(i.whatsapp)) ic += `<a href="${esc(safeUrl(i.whatsapp))}" target="_blank" rel="noopener" aria-label="WhatsApp">${SOC_ICONS.whatsapp}</a>`;
+        if (tel) ic += `<a href="${esc(tel)}" aria-label="${esc(t('call'))}">📞</a>`;
+        let rows = '';
+        if (i.phone) rows += `<a class="v-row" href="${esc(tel)}"><span>${esc(t('phone'))}</span><span>${esc(i.phone)}</span></a>`;
+        if (i.address) rows += safeUrl(i.mapsUrl) ? `<a class="v-row" href="${esc(safeUrl(i.mapsUrl))}" target="_blank" rel="noopener"><span>${esc(t('address'))}</span><span>${esc(i.address)}</span></a>`
+            : `<div class="v-row"><span>${esc(t('address'))}</span><span>${esc(i.address)}</span></div>`;
+        if (i.hours) rows += `<div class="v-row"><span>${esc(t('hours'))}</span><span>${esc(i.hours)}</span></div>`;
+        $('v-contacts').innerHTML = (ic || rows) ? `<h4>💬 ${esc(t('contactUs'))}</h4>` + (ic ? `<div class="v-soc">${ic}</div>` : '') + rows : '';
+        $('v-contacts').classList.toggle('hidden', !(ic || rows));
+    } else $('v-contacts').classList.add('hidden');
     $('info-acts').innerHTML = acts ? '<div style="display:flex;flex-direction:column;gap:10px;margin-top:10px">' + acts + '</div>' : '';
 
     let soc = '';
@@ -605,7 +829,9 @@ function buildMenu() {
     ITEMS.forEach((d, n) => { const k = secOf(d) + '|' + d.cat; if (!groups[k]) { groups[k] = []; first[k] = n; } groups[k].push(d); });
     CATS = Object.keys(groups).map(k => {
         const cat = k.slice(k.indexOf('|') + 1);
-        return { key: k, sec: k.slice(0, k.indexOf('|')), title: tr((cfgCats[cat] || {}).name, cat), items: groups[k], order: (cfgCats[cat] || {}).order, n: first[k] };
+        // фото плитки: своё фото категории (админка), иначе — первое блюдо с фото
+        const photo = safeUrl((cfgCats[cat] || {}).photo) || (groups[k].find(d => d.photo) || {}).photo || '';
+        return { key: k, sec: k.slice(0, k.indexOf('|')), title: tr((cfgCats[cat] || {}).name, cat), items: groups[k], order: (cfgCats[cat] || {}).order, n: first[k], photo };
     }).sort((a, b) => {
         const ao = a.order != null ? a.order : 1000, bo = b.order != null ? b.order : 1000;
         return ao - bo || (a.sec === b.sec ? 0 : a.sec === 'KUXNYA' ? -1 : 1) || a.n - b.n;
@@ -616,6 +842,64 @@ function buildMenu() {
 // ----- Кухня | Бар → плитки категорий → блюда одной категории (21.10, как в терминале) -----
 let SEC = 'KUXNYA', CAT = -1;   // открытый раздел и категория (-1 — плитки категорий)
 function secOf(d) { return d.main === 'BAR' ? 'BAR' : 'KUXNYA'; }
+// «Интерьер и видео» (22.10): первая плитка и первая кнопка в строке категорий, CAT = GAL
+const GAL = -2;
+function galList() { return ((S && S.gallery) || []).filter(g => safeUrl(g.src)); }
+function phVar(u) { return u ? ` style="--ph:url('${esc(u)}')"` : ''; }
+function galTile() {
+    const g = galList(); if (!g.length) return '';
+    const cover = (g.find(x => x.type === 'photo') || {}).src || g[0].poster || '';
+    const nv = g.filter(x => x.type === 'video').length, np = g.length - nv;
+    const cnt = [nv ? nv + ' ' + t('videos').toLowerCase() : '', np ? np + ' ' + t('photos').toLowerCase() : ''].filter(Boolean).join(' · ');
+    return `<button class="tile gal-tile" type="button" onclick="openCat(${GAL})"${phVar(safeUrl(cover))}><b>🎬 ${esc(t('interior'))}</b><small>${esc(cnt)}</small></button>`;
+}
+function galCards(type) {
+    return galList().map((g, n) => ({ g, n })).filter(x => x.g.type === type).map(({ g, n }) => {
+        const title = tr(g.title, '');
+        const media = type === 'video'
+            ? `<video src="${esc(safeUrl(g.src))}" ${safeUrl(g.poster) ? `poster="${esc(safeUrl(g.poster))}"` : ''} muted loop playsinline preload="auto"></video><span class="gplay">▶</span>`
+            : `<img src="${esc(safeUrl(g.src))}" loading="lazy" alt="">`;
+        return `<div class="gcard" onclick="openMedia(${n})"><div class="gmedia">${media}</div>${title ? `<div class="gtitle">${esc(title)}</div>` : ''}</div>`;
+    }).join('');
+}
+function renderGallery() {
+    const v = galCards('video'), p = galCards('photo');
+    $('sections').innerHTML = (v ? `<div class="section"><h3>${esc(t('videos'))}</h3><div class="gal-grid">${v}</div></div>` : '') +
+        (p ? `<div class="section"><h3>${esc(t('photos'))}</h3><div class="gal-grid">${p}</div></div>` : '');
+    // ролики в сетке играют без звука, только пока видны на экране
+    if ('IntersectionObserver' in window) {
+        const io = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) e.target.play().catch(() => {}); else e.target.pause(); }), { threshold: .4 });
+        document.querySelectorAll('#sections .gmedia video').forEach(v => {
+            v.muted = true; io.observe(v);
+            const r = v.getBoundingClientRect();   // видимые — сразу, не дожидаясь наблюдателя
+            if (r.top < innerHeight && r.bottom > 0) v.play().catch(() => {});
+        });
+    }
+}
+function openMedia(n) {
+    const g = galList()[n]; if (!g) return;
+    const title = tr(g.title, '');
+    $('media-body').innerHTML = (g.type === 'video'
+        ? `<video src="${esc(safeUrl(g.src))}" ${safeUrl(g.poster) ? `poster="${esc(safeUrl(g.poster))}"` : ''} controls autoplay playsinline></video>`
+        : `<img src="${esc(safeUrl(g.src))}" alt="">`) + (title ? `<div class="mtitle">${esc(title)}</div>` : '');
+    openSheet('media-sheet');
+}
+// ☰ в шапке «Витрины»: обслуживание, Wi-Fi, контакты, язык
+function openMore() {
+    const i = S.info, b = [];
+    if (tableId && S.features.callWaiter) b.push(`<button class="act" onclick="askService('waiter')"><div class="ic">🛎️</div><div class="tx"><b>${esc(t('callWaiter'))}</b></div><span class="chev">›</span></button>`);
+    if (tableId && S.features.bill) b.push(`<button class="act" onclick="askService('bill')"><div class="ic">🧾</div><div class="tx"><b>${esc(t('askBill'))}</b></div><span class="chev">›</span></button>`);
+    if (i.wifiPassword) b.push(`<button class="act" onclick="copyWifi()"><div class="ic">📶</div><div class="tx"><b>${esc(t('wifi'))}${i.wifiName ? ': ' + esc(i.wifiName) : ''}</b><small>${esc(i.wifiPassword)}</small></div><span class="chev">⧉</span></button>`);
+    if (i.phone) b.push(`<a class="act" href="tel:${esc(i.phone.replace(/[^\d+]/g, ''))}"><div class="ic">📞</div><div class="tx"><b>${esc(t('call'))}</b><small>${esc(i.phone)}</small></div><span class="chev">›</span></a>`);
+    if (safeUrl(i.mapsUrl)) b.push(`<a class="act" href="${esc(safeUrl(i.mapsUrl))}" target="_blank" rel="noopener"><div class="ic">📍</div><div class="tx"><b>${esc(t('map'))}</b><small>${esc(i.address || '')}</small></div><span class="chev">›</span></a>`);
+    if (S.features.reviews) b.push(`<button class="act" onclick="openReview()"><div class="ic">⭐</div><div class="tx"><b>${esc(t('review'))}</b></div><span class="chev">›</span></button>`);
+    const langs = S.languages.enabled;
+    if (langs.length > 1) b.push(`<div class="field-label" style="font-size:13px;color:var(--muted);margin-top:6px">${esc(t('language'))}</div><div class="lang-pick">` +
+        langs.map(l => `<button class="${l === lang ? 'on' : ''}" onclick="setLang('${l}'); openMore()">${{ ru: 'Русский', az: 'Azərbaycan', en: 'English' }[l]}</button>`).join('') + '</div>');
+    $('more-title').textContent = i.name || '';
+    $('more-body').innerHTML = b.join('');
+    openSheet('more-sheet');
+}
 function renderMenuView() {
     if (!CATS.length) {
         $('tiles').classList.add('hidden'); $('cats').classList.add('hidden'); $('seg').classList.add('hidden');
@@ -626,16 +910,19 @@ function renderMenuView() {
     $('seg').classList.toggle('hidden', !(CATS.some(c => c.sec === 'KUXNYA') && CATS.some(c => c.sec === 'BAR')));
     document.querySelectorAll('#seg button').forEach(b => b.classList.toggle('on', b.dataset.sec === SEC));
     const list = CATS.filter(c => c.sec === SEC);
-    const c = CATS[CAT];
-    if (!c || c.sec !== SEC) {
+    const c = CATS[CAT], v = IS_V(), gal = galList();
+    if (CAT === GAL && !gal.length) CAT = -1;
+    if (CAT !== GAL && (!c || c.sec !== SEC)) {
         CAT = -1;
-        $('tiles').innerHTML = list.map(x => `<button class="tile" type="button" onclick="openCat(${CATS.indexOf(x)})"><b>${esc(x.title)}</b><small>${x.items.length}</small></button>`).join('');
+        $('tiles').innerHTML = galTile() + list.map(x => `<button class="tile" type="button" onclick="openCat(${CATS.indexOf(x)})"${v ? phVar(x.photo) : ''}><b>${esc(x.title)}</b><small>${v ? esc(plural(x.items.length, 'dishes')) : x.items.length}</small></button>`).join('');
         $('tiles').classList.remove('hidden'); $('cats').classList.add('hidden'); $('sections').innerHTML = '';
         return;
     }
-    $('cats').innerHTML = list.map(x => { const i = CATS.indexOf(x); return `<button class="cat ${i === CAT ? 'on' : ''}" data-i="${i}" onclick="pickCat(${i})">${esc(x.title)}</button>`; }).join('');
+    $('cats').innerHTML = (gal.length ? `<button class="cat gal-cat ${CAT === GAL ? 'on' : ''}" onclick="pickCat(${GAL})"${v ? phVar(safeUrl((gal.find(x => x.type === 'photo') || {}).src || gal[0].poster)) : ''}>🎬 ${esc(t('interior'))}</button>` : '') +
+        list.map(x => { const i = CATS.indexOf(x); return `<button class="cat ${i === CAT ? 'on' : ''}" data-i="${i}" onclick="pickCat(${i})"${v ? phVar(x.photo) : ''}>${esc(x.title)}</button>`; }).join('');
     $('cats').classList.remove('hidden'); $('tiles').classList.add('hidden');
-    $('sections').innerHTML = `<div class="section"><h3>${esc(c.title)}</h3><div class="items ${window.LAYOUT}">${c.items.map(cardHtml).join('')}</div></div>`;
+    if (CAT === GAL) renderGallery();
+    else $('sections').innerHTML = `<div class="section"><h3>${esc(c.title)}</h3><div class="items ${window.LAYOUT}">${c.items.map(cardHtml).join('')}</div></div>`;
     const on = document.querySelector('.cat.on'); if (on) on.scrollIntoView({ inline: 'center', block: 'nearest' });
 }
 function menuState() { return { screen: 'menu', sec: SEC, cat: CAT }; }
@@ -764,7 +1051,10 @@ function openSheet(id) {
     $('ov').classList.add('show'); $(id).classList.add('show');
     if (!history.state || !history.state.sheet) history.pushState(Object.assign({}, history.state, { sheet: id }), '');   // раздел и категория остаются
 }
-function hideSheets() { document.querySelectorAll('.sheet').forEach(s => s.classList.remove('show')); $('ov').classList.remove('show'); }
+function hideSheets() {
+    document.querySelectorAll('.sheet').forEach(s => s.classList.remove('show')); $('ov').classList.remove('show');
+    const mv = document.querySelector('#media-body video'); if (mv) { mv.pause(); $('media-body').innerHTML = ''; }
+}
 function closeSheets() { if (history.state && history.state.sheet) history.back(); else hideSheets(); }
 function openMenu(sec) {
     if (sec === 'KUXNYA' || sec === 'BAR') SEC = sec;
@@ -774,7 +1064,14 @@ function openMenu(sec) {
     renderMenuView(); window.scrollTo(0, 0); updateCart();
 }
 function goHome() { if (history.state && history.state.screen === 'menu') history.back(); else showHome(); }
-function showHome() { $('menu').classList.add('hidden'); $('home').classList.remove('hidden'); updateCart(); }
+function showHome() {
+    $('menu').classList.add('hidden'); $('home').classList.remove('hidden'); $('totop').classList.remove('show'); updateCart();
+    const v = $('cover-video'); if (v.hasAttribute('src')) v.play().catch(() => {});
+}
+window.addEventListener('scroll', () => {
+    const on = !$('menu').classList.contains('hidden') && window.scrollY > 700;
+    if (on !== $('totop').classList.contains('show')) $('totop').classList.toggle('show', on);
+}, { passive: true });
 window.addEventListener('popstate', e => {
     hideSheets();
     if (e.state && e.state.screen === 'menu') {
@@ -914,11 +1211,19 @@ async function sendReview() {
 // =====================================================================
 //  ЗАПУСК
 // =====================================================================
-async function getJson(url, base) {
+// сбой связи или туннеля — ещё две попытки, иначе гость видит меню без настроек (22.10)
+async function getJson(url, base, tries) {
     base = base == null ? API : base;
-    const r = await fetch(base + url + (url.includes('?') ? '&' : '?') + 'v=' + Date.now(), { headers: { 'ngrok-skip-browser-warning': '1' } });
-    if (!r.ok) throw new Error(r.status);
-    return r.json();
+    tries = tries == null ? 3 : tries;
+    try {
+        const r = await fetch(base + url + (url.includes('?') ? '&' : '?') + 'v=' + Date.now(), { headers: { 'ngrok-skip-browser-warning': '1' } });
+        if (!r.ok) throw new Error(r.status);
+        return await r.json();
+    } catch (e) {
+        if (tries <= 1) throw e;
+        await new Promise(ok => setTimeout(ok, 400));
+        return getJson(url, base, tries - 1);
+    }
 }
 function chooseLang() {
     let l = null;
