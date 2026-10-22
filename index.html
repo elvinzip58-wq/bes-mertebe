@@ -281,6 +281,12 @@ html[data-tpl="wine-steak"] .section h3 {
 .gmedia img, .gmedia video { width: 100%; height: 100%; object-fit: cover; display: block; }
 .gplay { position: absolute; left: 10px; bottom: 10px; width: 34px; height: 34px; border-radius: 50%; background: rgba(0,0,0,.55); color: #fff;
     display: flex; align-items: center; justify-content: center; font-size: 13px; backdrop-filter: blur(6px); pointer-events: none; }
+/* видео блюда (22.10): в карточке блюда ролик вместо фото, метка «▶ Видео» в списке */
+.prod-vid { position: relative; cursor: pointer; }
+.prod-vid video.prod-ph { display: block; background: #000; }
+.prod-vid .gplay { width: auto; height: auto; padding: 7px 12px; border-radius: 999px; left: -8px; bottom: 26px; font-size: 13px; font-weight: 700; }
+.badge.vbadge { background: rgba(0,0,0,.72); color: #fff; margin-left: 4px; }
+.badge.vbadge:first-child { margin-left: 0; }
 .gtitle { padding: 12px 14px 14px; font-family: var(--font-head); font-weight: 600; font-size: 15px; line-height: 1.3; }
 .tile.gal-tile small, .cat.gal-cat { }
 #media-sheet { top: 0; max-width: none; background: #000; color: #fff; padding: env(safe-area-inset-top) 0 calc(16px + var(--safe-b)); max-height: none; height: auto; border-radius: 0; display: flex; flex-direction: column; overflow: hidden; }
@@ -578,7 +584,7 @@ const I18N = {
         far: 'Вы слишком далеко от ресторана. Заказы принимаются только внутри.', menuErr: 'Не удалось загрузить меню', badge_new: 'Новинка', badge_hit: 'Хит',
         badge_spicy: 'Острое 🌶', badge_veg: 'Вегетарианское 🌿', badge_chef: 'От шефа', svcNote: 'Сервис {p}%', kitchen: 'Кухня', bar: 'Бар',
         menuSub: 'Блюда и напитки нашей кухни', contactUs: 'Связаться с нами', phone: 'Телефон', address: 'Адрес', interior: 'Интерьер и видео',
-        videos: 'Видео', photos: 'Фото', language: 'Язык', dishes1: 'блюдо', dishes2: 'блюда', dishes5: 'блюд', rev1: 'отзыв', rev2: 'отзыва', rev5: 'отзывов' },
+        dishVideo: 'Видео', tapSound: 'Нажмите — со звуком', videos: 'Видео', photos: 'Фото', language: 'Язык', dishes1: 'блюдо', dishes2: 'блюда', dishes5: 'блюд', rev1: 'отзыв', rev2: 'отзыва', rev5: 'отзывов' },
     az: { openMenu: 'Menyunu aç', callWaiter: 'Ofisiantı çağır', askBill: 'Hesabı istə', cart: 'Səbət', yourOrder: 'Sifarişiniz', total: 'Cəmi',
         sendOrder: 'Sifarişi göndər', orderHint: 'Ofisiant sifarişi təsdiqləyib mətbəxə ötürəcək', service: 'Xidmət', cancel: 'Ləğv et',
         search: 'Yemək axtar…', notFound: 'Heç nə tapılmadı', add: 'Əlavə et', commentPh: '💬 Qeyd (soğansız, acısız…)', open: 'Açıqdır', closed: 'Bağlıdır',
@@ -593,7 +599,7 @@ const I18N = {
         far: 'Restorandan çox uzaqdasınız. Sifarişlər yalnız içəridə qəbul olunur.', menuErr: 'Menyu yüklənmədi', badge_new: 'Yeni', badge_hit: 'Hit',
         badge_spicy: 'Acı 🌶', badge_veg: 'Vegetarian 🌿', badge_chef: 'Şefdən', svcNote: 'Servis {p}%', kitchen: 'Mətbəx', bar: 'Bar',
         menuSub: 'Mətbəximizin yemək və içkiləri', contactUs: 'Bizimlə əlaqə', phone: 'Telefon', address: 'Ünvan', interior: 'İnteryer və videolar',
-        videos: 'Videolar', photos: 'Şəkillər', language: 'Dil', dishes1: 'yemək', dishes2: 'yemək', dishes5: 'yemək', rev1: 'rəy', rev2: 'rəy', rev5: 'rəy' },
+        dishVideo: 'Video', tapSound: 'Səslə baxmaq üçün toxunun', videos: 'Videolar', photos: 'Şəkillər', language: 'Dil', dishes1: 'yemək', dishes2: 'yemək', dishes5: 'yemək', rev1: 'rəy', rev2: 'rəy', rev5: 'rəy' },
     en: { openMenu: 'Open menu', callWaiter: 'Call waiter', askBill: 'Ask for bill', cart: 'Cart', yourOrder: 'Your order', total: 'Total',
         sendOrder: 'Send order', orderHint: 'A waiter will confirm your order and pass it to the kitchen', service: 'Service', cancel: 'Cancel',
         search: 'Search dishes…', notFound: 'Nothing found', add: 'Add', commentPh: '💬 Note (no onion, not spicy…)', open: 'Open', closed: 'Closed',
@@ -608,7 +614,7 @@ const I18N = {
         far: 'You are too far from the restaurant. Orders are accepted inside only.', menuErr: 'Could not load the menu', badge_new: 'New', badge_hit: 'Bestseller',
         badge_spicy: 'Spicy 🌶', badge_veg: 'Vegetarian 🌿', badge_chef: "Chef's choice", svcNote: 'Service {p}%', kitchen: 'Kitchen', bar: 'Bar',
         menuSub: 'Dishes and drinks from our kitchen', contactUs: 'Contact us', phone: 'Phone', address: 'Address', interior: 'Interior & videos',
-        videos: 'Videos', photos: 'Photos', language: 'Language', dishes1: 'dish', dishes2: 'dishes', dishes5: 'dishes', rev1: 'review', rev2: 'reviews', rev5: 'reviews' }
+        dishVideo: 'Video', tapSound: 'Tap for sound', videos: 'Videos', photos: 'Photos', language: 'Language', dishes1: 'dish', dishes2: 'dishes', dishes5: 'dishes', rev1: 'review', rev2: 'reviews', rev5: 'reviews' }
 };
 
 // =====================================================================
@@ -814,7 +820,8 @@ function dishView(it) {
         id: String(it.id), price: it.price, raw: it,
         name: tr(d.name, it.name),
         desc: S.features.descriptions ? tr(d.desc, '') : '',
-        photo: safeUrl(d.photo), badge: d.badge || '',
+        // видео блюда (22.10): без своего фото карточка берёт кадр из ролика
+        video: safeUrl(d.video), photo: safeUrl(d.photo) || (safeUrl(d.video) ? safeUrl(d.videoPoster) : ''), badge: d.badge || '',
         stop: !!it.stop, left: it.left, cat: it.category || '—', main: it.main_category || ''
     };
 }
@@ -884,6 +891,12 @@ function openMedia(n) {
         : `<img src="${esc(safeUrl(g.src))}" alt="">`) + (title ? `<div class="mtitle">${esc(title)}</div>` : '');
     openSheet('media-sheet');
 }
+function openDishVideo(id) {
+    const d = findItem(id); if (!d || !d.video) return;
+    const pv = document.querySelector('#product-body video'); if (pv) pv.pause();
+    $('media-body').innerHTML = `<video src="${esc(d.video)}" ${d.photo ? `poster="${esc(d.photo)}"` : ''} controls autoplay playsinline></video><div class="mtitle">${esc(d.name)}</div>`;
+    openSheet('media-sheet');
+}
 // ☰ в шапке «Витрины»: обслуживание, Wi-Fi, контакты, язык
 function openMore() {
     const i = S.info, b = [];
@@ -941,7 +954,8 @@ function cardHtml(d) {
     const q = cart[d.id] ? cart[d.id].qty : 0;
     // Без фото карточка просто текстовая — пустые заглушки выглядят непрофессионально
     const img = d.photo ? `<img class="ph" src="${esc(d.photo)}" loading="lazy" alt="">` : '';
-    const badge = d.badge ? `<span class="badge">${esc(t('badge_' + d.badge))}</span>` : '';
+    const badge = (d.badge ? `<span class="badge">${esc(t('badge_' + d.badge))}</span>` : '') +
+        (d.video ? `<span class="badge vbadge">▶ ${esc(t('dishVideo'))}</span>` : '');
     const left = (!d.stop && d.left != null && d.left <= 5) ? ` · ${esc(t('left'))}: ${d.left}` : '';
     const control = d.stop ? `<span class="stopped-label">${esc(t('stop'))}</span>` : (tableId && S.features.ordering ? qtyHtml(d.id, q) : '');
     const info = `<div class="info">${badge}<div class="name">${esc(d.name)}</div>${d.desc ? `<div class="desc">${esc(d.desc)}</div>` : ''}
@@ -1012,12 +1026,17 @@ let curProduct = null;
 function openProduct(id) {
     const d = findItem(id); if (!d) return;
     curProduct = id;
-    $('product-body').innerHTML = (d.photo ? `<img class="prod-ph" src="${esc(d.photo)}" alt="">` : '') +
-        (d.badge ? `<span class="badge">${esc(t('badge_' + d.badge))}</span>` : '') +
+    // ролик блюда крутится без звука; нажатие — на весь экран со звуком (как «Интерьер и видео»)
+    const media = d.video
+        ? `<div class="prod-vid" onclick="openDishVideo('${d.id}')"><video class="prod-ph" src="${esc(d.video)}" ${d.photo ? `poster="${esc(d.photo)}"` : ''} muted loop playsinline autoplay preload="auto"></video><span class="gplay">🔊 ${esc(t('tapSound'))}</span></div>`
+        : (d.photo ? `<img class="prod-ph" src="${esc(d.photo)}" alt="">` : '');
+    $('product-body').innerHTML = media +
+        (d.badge ?`<span class="badge">${esc(t('badge_' + d.badge))}</span>` : '') +
         `<h2 style="margin-bottom:6px">${esc(d.name)}</h2>` + (d.desc ? `<p class="muted">${esc(d.desc)}</p>` : '') +
         `<div class="sheet-foot" id="prod-foot"></div>`;
     renderProductFoot();
     openSheet('product-sheet');
+    const pv = document.querySelector('#product-body video'); if (pv) { pv.muted = true; pv.play().catch(() => {}); }   // autoplay у вставленного ролика срабатывает не везде
 }
 function renderProductFoot() {
     const d = findItem(curProduct); if (!d) return;
@@ -1054,6 +1073,7 @@ function openSheet(id) {
 function hideSheets() {
     document.querySelectorAll('.sheet').forEach(s => s.classList.remove('show')); $('ov').classList.remove('show');
     const mv = document.querySelector('#media-body video'); if (mv) { mv.pause(); $('media-body').innerHTML = ''; }
+    const pv = document.querySelector('#product-body video'); if (pv) pv.pause();
 }
 function closeSheets() { if (history.state && history.state.sheet) history.back(); else hideSheets(); }
 function openMenu(sec) {
