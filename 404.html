@@ -579,7 +579,7 @@ const I18N = {
         chooseStars: 'Поставьте оценку', confirmWaiter: 'Позвать официанта к столу?', confirmBill: 'Попросить счёт?', yes: 'Да', sent: 'Отправлено ✅',
         waitConfirm: 'Заказ отправлен! Ждём подтверждения официанта…', accepted: '✅ Официант принял ваш заказ', acceptedWaiter: '✅ Официант идёт к вам',
         acceptedBill: '✅ Официант несёт счёт', rejected: '❌ Официант не подтвердил запрос. Пожалуйста, обратитесь к персоналу.',
-        tooMany: 'Слишком много запросов, подождите', netErr: 'Нет связи с рестораном', wait: 'Запрос уже отправлен, подождите', empty: 'Корзина пуста',
+        tooMany: 'Слишком много запросов, подождите', movedTo: 'Ваш стол теперь', netErr: 'Нет связи с рестораном', wait: 'Запрос уже отправлен, подождите', empty: 'Корзина пуста',
         stop: 'Нет в наличии', left: 'Осталось', gpsTitle: 'Нужна геолокация', gpsText: 'Разрешите доступ к местоположению, чтобы сделать заказ: так мы защищаем ресторан от ложных заказов.',
         far: 'Вы слишком далеко от ресторана. Заказы принимаются только внутри.', menuErr: 'Не удалось загрузить меню', badge_new: 'Новинка', badge_hit: 'Хит',
         badge_spicy: 'Острое 🌶', badge_veg: 'Вегетарианское 🌿', badge_chef: 'От шефа', svcNote: 'Сервис {p}%', kitchen: 'Кухня', bar: 'Бар',
@@ -594,7 +594,7 @@ const I18N = {
         chooseStars: 'Qiymət verin', confirmWaiter: 'Ofisiantı masaya çağıraq?', confirmBill: 'Hesabı istəyək?', yes: 'Bəli', sent: 'Göndərildi ✅',
         waitConfirm: 'Sifariş göndərildi! Ofisiantın təsdiqini gözləyirik…', accepted: '✅ Ofisiant sifarişinizi qəbul etdi', acceptedWaiter: '✅ Ofisiant gəlir',
         acceptedBill: '✅ Ofisiant hesabı gətirir', rejected: '❌ Ofisiant sorğunu təsdiqləmədi. Zəhmət olmasa, işçiyə müraciət edin.',
-        tooMany: 'Çox sorğu, bir az gözləyin', netErr: 'Restoranla əlaqə yoxdur', wait: 'Sorğu artıq göndərilib, gözləyin', empty: 'Səbət boşdur',
+        tooMany: 'Çox sorğu, bir az gözləyin', movedTo: 'Masanız indi', netErr: 'Restoranla əlaqə yoxdur', wait: 'Sorğu artıq göndərilib, gözləyin', empty: 'Səbət boşdur',
         stop: 'Bitib', left: 'Qalıb', gpsTitle: 'Məkan lazımdır', gpsText: 'Sifariş üçün məkana icazə verin: bu, restoranı saxta sifarişlərdən qoruyur.',
         far: 'Restorandan çox uzaqdasınız. Sifarişlər yalnız içəridə qəbul olunur.', menuErr: 'Menyu yüklənmədi', badge_new: 'Yeni', badge_hit: 'Hit',
         badge_spicy: 'Acı 🌶', badge_veg: 'Vegetarian 🌿', badge_chef: 'Şefdən', svcNote: 'Servis {p}%', kitchen: 'Mətbəx', bar: 'Bar',
@@ -609,7 +609,7 @@ const I18N = {
         chooseStars: 'Please choose a rating', confirmWaiter: 'Call a waiter to your table?', confirmBill: 'Ask for the bill?', yes: 'Yes', sent: 'Sent ✅',
         waitConfirm: 'Order sent! Waiting for the waiter to confirm…', accepted: '✅ The waiter accepted your order', acceptedWaiter: '✅ A waiter is coming',
         acceptedBill: '✅ The waiter is bringing the bill', rejected: '❌ The request was not confirmed. Please ask the staff.',
-        tooMany: 'Too many requests, please wait', netErr: 'No connection to the restaurant', wait: 'Request already sent, please wait', empty: 'Cart is empty',
+        tooMany: 'Too many requests, please wait', movedTo: 'Your table is now', netErr: 'No connection to the restaurant', wait: 'Request already sent, please wait', empty: 'Cart is empty',
         stop: 'Sold out', left: 'Left', gpsTitle: 'Location needed', gpsText: 'Please allow location access to order: this protects the restaurant from fake orders.',
         far: 'You are too far from the restaurant. Orders are accepted inside only.', menuErr: 'Could not load the menu', badge_new: 'New', badge_hit: 'Bestseller',
         badge_spicy: 'Spicy 🌶', badge_veg: 'Vegetarian 🌿', badge_chef: "Chef's choice", svcNote: 'Service {p}%', kitchen: 'Kitchen', bar: 'Bar',
@@ -1140,6 +1140,13 @@ async function postCall(body) {
         if (data.error === 'WIFI_REQUIRED') throw new Error('📡 ' + data.message);
         if (r.status === 429) throw new Error(t('tooMany'));
         throw new Error(data.message || data.error || t('netErr'));
+    }
+    // 26.10: компанию пересадили (кассир перенёс или объединил стол) — меню дальше заказывает на новый стол
+    if (data.moved && data.moved.tableId) {
+        tableId = String(data.moved.tableId); hall = data.moved.hall || hall;
+        try { sessionStorage.setItem('qr_table', tableId); sessionStorage.setItem('qr_hall', hall); } catch (e) {}
+        $('table-chip').textContent = '🪑 ' + t('table') + ' ' + tableId;
+        setTimeout(() => toast(t('movedTo') + ' ' + (data.moved.tableName || tableId)), 2600);
     }
     return data;
 }
