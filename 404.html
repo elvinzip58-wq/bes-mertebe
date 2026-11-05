@@ -530,9 +530,13 @@ html[data-tpl="vitrina"][data-mode="light"] #home > .lang-switch button.on { bac
 
 <div class="sheet" id="gps-sheet">
     <div class="grip"></div>
-    <h2>📍 <span data-t="gpsTitle"></span></h2>
-    <p class="muted" data-t="gpsText"></p>
-    <div class="sheet-foot"><button class="btn" onclick="closeSheets()">OK</button></div>
+    <h2>📍 <span id="gps-title" data-t="gpsTitle"></span></h2>
+    <p class="muted" id="gps-text" data-t="gpsText"></p>
+    <div id="gps-help" class="muted" style="font-size:14px;line-height:1.45;margin-top:10px;display:flex;flex-direction:column;gap:8px"></div>
+    <div class="sheet-foot">
+        <button class="btn sec" onclick="gpsPending=null;closeSheets()" data-t="gpsClose"></button>
+        <button class="btn" onclick="gpsRetry()" data-t="gpsRetry"></button>
+    </div>
 </div>
 
 <div class="toast" id="toast"></div>
@@ -662,6 +666,28 @@ if (params.get('table')) {
 const $ = id => document.getElementById(id);
 function esc(s) { return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;'); }
 function safeUrl(u) { u = String(u || ''); return /^(https?:|tel:|mailto:|photos\/)/i.test(u) ? u : ''; }
+// геолокация (05.11, Beş Mertebe: «включили — всё равно не заказать»): подсказки, где включить, и «Попробовать снова»
+Object.assign(I18N.ru, { gpsRetry: 'Попробовать снова', gpsClose: 'Закрыть', gpsChecking: 'Определяем место…',
+    gpsDeniedTitle: 'Доступ к месту запрещён',
+    gpsIos: 'iPhone: Настройки → Конфиденциальность → Службы геолокации — включить; там же «Сайты Safari» → «При использовании» и «Точная геопозиция». Потом в Safari нажмите «аА» слева от адреса → «Настройки веб-сайта» → Геопозиция → Разрешить.',
+    gpsAndroid: 'Android: нажмите на значок слева от адреса (🔒 или ⚙) → Разрешения → Местоположение → Разрешить. И включите геолокацию в верхней шторке телефона.',
+    gpsInApp: 'Если меню открыто внутри Instagram, WhatsApp или Telegram — откройте его в Safari или Chrome.',
+    gpsSlowTitle: 'Не удалось определить место', gpsSlowText: 'Проверьте, что геолокация на телефоне включена, и нажмите «Попробовать снова». У окна телефон находит место быстрее.',
+    gpsPrecise: 'Телефон определяет место слишком неточно. Включите «Точная геопозиция»: iPhone — Настройки → Конфиденциальность → Службы геолокации → Сайты Safari.' });
+Object.assign(I18N.az, { gpsRetry: 'Yenidən yoxla', gpsClose: 'Bağla', gpsChecking: 'Məkan müəyyən edilir…',
+    gpsDeniedTitle: 'Məkana icazə verilməyib',
+    gpsIos: 'iPhone: Ayarlar → Məxfilik → Məkan xidmətləri — aktiv edin; orada «Safari saytları» → «İstifadə zamanı» və «Dəqiq məkan». Sonra Safari-də ünvanın solunda «aA» → «Veb-sayt ayarları» → Məkan → İcazə ver.',
+    gpsAndroid: 'Android: ünvanın solundakı işarəyə (🔒 və ya ⚙) toxunun → İcazələr → Məkan → İcazə ver. Telefonun yuxarı panelində məkanı da açın.',
+    gpsInApp: 'Menyu Instagram, WhatsApp və ya Telegram içində açılıbsa — onu Safari və ya Chrome-da açın.',
+    gpsSlowTitle: 'Məkanı müəyyən etmək olmadı', gpsSlowText: 'Telefonda məkanın açıq olduğunu yoxlayın və «Yenidən yoxla» düyməsinə basın. Pəncərə yanında telefon məkanı daha tez tapır.',
+    gpsPrecise: 'Telefon məkanı çox qeyri-dəqiq təyin edir. «Dəqiq məkan»ı aktiv edin: iPhone — Ayarlar → Məxfilik → Məkan xidmətləri → Safari saytları.' });
+Object.assign(I18N.en, { gpsRetry: 'Try again', gpsClose: 'Close', gpsChecking: 'Getting your location…',
+    gpsDeniedTitle: 'Location access is blocked',
+    gpsIos: 'iPhone: Settings → Privacy → Location Services — turn on; there, “Safari Websites” → “While Using” and “Precise Location”. Then in Safari tap “aA” left of the address → “Website Settings” → Location → Allow.',
+    gpsAndroid: 'Android: tap the icon left of the address (🔒 or ⚙) → Permissions → Location → Allow. Also turn on location in the phone’s top panel.',
+    gpsInApp: 'If the menu is open inside Instagram, WhatsApp or Telegram, open it in Safari or Chrome.',
+    gpsSlowTitle: 'Could not get your location', gpsSlowText: 'Check that location is on and tap “Try again”. Near a window the phone finds it faster.',
+    gpsPrecise: 'Your phone reports the location too roughly. Turn on “Precise Location”: iPhone — Settings → Privacy → Location Services → Safari Websites.' });
 function t(k) { return (I18N[lang] && I18N[lang][k]) || I18N.ru[k] || k; }
 function money(x) { return (Math.round((+x || 0) * 100) / 100).toLocaleString('ru-RU', { maximumFractionDigits: 2 }) + ' ₼'; }
 function tr(obj, fallback) { return (obj && (obj[lang] || obj.ru || obj.az || obj.en)) || fallback || ''; }
@@ -842,14 +868,20 @@ function buildMenu() {
         return { key: k, sec: k.slice(0, k.indexOf('|')), title: tr((cfgCats[cat] || {}).name, cat), items: groups[k], order: (cfgCats[cat] || {}).order, n: first[k], photo };
     }).sort((a, b) => {
         const ao = a.order != null ? a.order : 1000, bo = b.order != null ? b.order : 1000;
-        return ao - bo || (a.sec === b.sec ? 0 : a.sec === 'KUXNYA' ? -1 : 1) || a.n - b.n;
+        return ao - bo || secRank(a.sec) - secRank(b.sec) || a.n - b.n;
     });
     renderMenuView();
 }
 
 // ----- Кухня | Бар → плитки категорий → блюда одной категории (21.10, как в терминале) -----
 let SEC = 'KUXNYA', CAT = -1;   // открытый раздел и категория (-1 — плитки категорий)
-function secOf(d) { return d.main === 'BAR' ? 'BAR' : 'KUXNYA'; }
+// раздел блюда: Кухня, Бар или свой (05.11, «Setlər» — название группы как есть)
+function secOf(d) { return d.main && d.main !== 'KUXNYA' ? d.main : 'KUXNYA'; }
+function secRank(s) { return s === 'KUXNYA' ? 0 : s === 'BAR' ? 1 : 2; }
+function renderSeg(secs) {
+    const ico = { KUXNYA: '🍽️', BAR: '🍸' };
+    $('seg').innerHTML = secs.map(s => `<button type="button" data-sec="${esc(s)}" onclick="setSection(this.dataset.sec)">${ico[s] || '🧩'} <span>${esc(s === 'KUXNYA' ? t('kitchen') : s === 'BAR' ? t('bar') : s)}</span></button>`).join('');
+}
 // «Интерьер и видео» (22.10): первая плитка и первая кнопка в строке категорий, CAT = GAL
 const GAL = -2;
 function galList() { return ((S && S.gallery) || []).filter(g => safeUrl(g.src)); }
@@ -921,7 +953,9 @@ function renderMenuView() {
         return;
     }
     if (!CATS.some(c => c.sec === SEC)) SEC = CATS[0].sec;
-    $('seg').classList.toggle('hidden', !(CATS.some(c => c.sec === 'KUXNYA') && CATS.some(c => c.sec === 'BAR')));
+    const secs = [...new Set(CATS.map(c => c.sec))].sort((a, b) => secRank(a) - secRank(b));
+    if ($('seg').dataset.k !== secs.join('|') + '|' + lang) { renderSeg(secs); $('seg').dataset.k = secs.join('|') + '|' + lang; }
+    $('seg').classList.toggle('hidden', secs.length < 2);
     document.querySelectorAll('#seg button').forEach(b => b.classList.toggle('on', b.dataset.sec === SEC));
     const list = CATS.filter(c => c.sec === SEC);
     const c = CATS[CAT], v = IS_V(), gal = galList();
@@ -1134,7 +1168,7 @@ function hideSheets() {
 }
 function closeSheets() { if (history.state && history.state.sheet) history.back(); else hideSheets(); }
 function openMenu(sec) {
-    if (sec === 'KUXNYA' || sec === 'BAR') SEC = sec;
+    if (sec) SEC = sec;
     CAT = -1;
     $('home').classList.add('hidden'); $('menu').classList.remove('hidden');
     history.pushState(menuState(), '');
@@ -1171,15 +1205,39 @@ function distance(a, b, c, d) {
     const x = Math.sin(dp / 2) ** 2 + Math.cos(p1) * Math.cos(p2) * Math.sin(dl / 2) ** 2;
     return R * 2 * Math.atan2(Math.sqrt(x), Math.sqrt(1 - x));
 }
-function checkGps() {
-    return new Promise((ok, fail) => {
+// Было (до 05.11): любая ошибка (телефон не успел за 10 с найти точное место внутри здания) — окно «разрешите геолокацию»,
+// хотя она разрешена; «OK» ничего не делал. Теперь: точно → не вышло → ещё раз обычной точностью; запрет — подсказка, где включить;
+// «Попробовать снова» повторяет тот же заказ/вызов. Удачная проверка — 15 минут без повторного вопроса.
+let gpsOkAt = 0, gpsPending = null;
+function gpsGet(precise) {
+    return new Promise((ok, no) => navigator.geolocation.getCurrentPosition(ok, no,
+        precise ? { timeout: 12000, enableHighAccuracy: true, maximumAge: 30000 } : { timeout: 20000, enableHighAccuracy: false, maximumAge: 300000 }));
+}
+function gpsSheet(kind) {
+    const ios = /iPhone|iPad|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+    $('gps-title').textContent = t(kind === 'denied' ? 'gpsDeniedTitle' : kind === 'slow' ? 'gpsSlowTitle' : 'gpsTitle');
+    $('gps-text').textContent = t(kind === 'slow' ? 'gpsSlowText' : kind === 'precise' ? 'gpsPrecise' : 'gpsText');
+    $('gps-help').innerHTML = kind === 'precise' ? '' : [ios ? 'gpsIos' : 'gpsAndroid', 'gpsInApp'].map(k => '<div>' + esc(t(k)) + '</div>').join('');
+    openSheet('gps-sheet');
+}
+function gpsRetry() { const f = gpsPending; gpsPending = null; closeSheets(); if (f) setTimeout(f, 350); }
+function checkGps(retry) {
+    return new Promise(async (ok, fail) => {
         if (!security.gps) return ok();
-        if (!navigator.geolocation) { openSheet('gps-sheet'); return fail(); }
-        navigator.geolocation.getCurrentPosition(p => {
-            const g = security.gpsData || {};
-            if (distance(p.coords.latitude, p.coords.longitude, g.lat, g.lng) > (g.radius || 150)) { toast(t('far'), 4000); return fail(); }
-            ok();
-        }, () => { openSheet('gps-sheet'); fail(); }, { timeout: 10000, enableHighAccuracy: true });
+        if (Date.now() - gpsOkAt < 15 * 60000) return ok();
+        gpsPending = retry || null;
+        if (!navigator.geolocation) { gpsSheet('slow'); return fail(); }
+        toast(t('gpsChecking'), 20000);
+        let p = null, er = null;
+        try { p = await gpsGet(true); } catch (e) { er = e; }
+        if (!p && !(er && er.code === 1)) { try { p = await gpsGet(false); } catch (e) { er = e; } }
+        $('toast').classList.remove('show');
+        if (!p) { gpsSheet(er && er.code === 1 ? 'denied' : 'slow'); return fail(); }
+        const g = security.gpsData || {}, acc = +p.coords.accuracy || 0;
+        // погрешность телефона внутри здания (30–100 м) не наказываем: считаем по ближнему краю круга точности (не больше 150 м)
+        const d = distance(p.coords.latitude, p.coords.longitude, g.lat, g.lng) - Math.min(acc, 150);
+        if (d > (g.radius || 150)) { if (acc > 500) gpsSheet('precise'); else toast(t('far'), 4000); return fail(); }
+        gpsOkAt = Date.now(); gpsPending = null; ok();
     });
 }
 function newCallId() { const a = new Uint8Array(12); crypto.getRandomValues(a); return Array.from(a, b => ('0' + b.toString(16)).slice(-2)).join(''); }
@@ -1219,7 +1277,7 @@ async function sendService(type) {
     closeSheets();
     if (cooldown) return toast(t('wait'));
     if (IS_PREVIEW) return toast(t('sent'));
-    try { await checkGps(); } catch (e) { return; }
+    try { await checkGps(() => sendService(type)); } catch (e) { return; }
     cooldown = true; setTimeout(() => cooldown = false, 5000);
     const callId = newCallId();
     try {
@@ -1232,7 +1290,7 @@ async function sendOrder() {
     if (!ids.length) return toast(t('empty'));
     if (cooldown) return toast(t('wait'));
     if (IS_PREVIEW) { closeSheets(); return toast(t('waitConfirm')); }
-    try { await checkGps(); } catch (e) { return; }
+    try { await checkGps(() => sendOrder()); } catch (e) { return; }
     const btn = $('send-btn'); btn.disabled = true;
     cooldown = true; setTimeout(() => cooldown = false, 5000);
     const callId = newCallId();
