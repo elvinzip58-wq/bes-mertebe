@@ -572,7 +572,7 @@ const FONTS = {
 const I18N = {
     ru: { openMenu: 'Открыть меню', callWaiter: 'Позвать официанта', askBill: 'Попросить счёт', cart: 'Корзина', yourOrder: 'Ваш заказ', total: 'Итого',
         sendOrder: 'Отправить заказ', orderHint: 'Официант подтвердит заказ и передаст его на кухню', service: 'Обслуживание', cancel: 'Отмена',
-        search: 'Найти блюдо…', notFound: 'Ничего не найдено', add: 'Добавить', commentPh: '💬 Комментарий (без лука, не острое…)', open: 'Открыто', closed: 'Закрыто',
+        search: 'Найти блюдо…', notFound: 'Ничего не найдено', add: 'Добавить', choose: 'Выбрать', variants: 'Варианты', commentPh: '💬 Комментарий (без лука, не острое…)', open: 'Открыто', closed: 'Закрыто',
         table: 'Стол', viewOnly: 'Отсканируйте QR-код на столе, чтобы сделать заказ', wifi: 'Wi-Fi', copied: 'Пароль скопирован', map: 'Как добраться', call: 'Позвонить',
         hours: 'Часы работы', review: 'Оставить отзыв', reviewTitle: 'Как вам у нас?', reviewText: 'Ваш отзыв увидит только администрация ресторана',
         reviewPh: 'Что понравилось, что улучшить?', contactPh: 'Имя или телефон (необязательно)', send: 'Отправить', thanks: 'Спасибо за отзыв! 💛',
@@ -587,7 +587,7 @@ const I18N = {
         dishVideo: 'Видео', tapSound: 'Нажмите — со звуком', videos: 'Видео', photos: 'Фото', language: 'Язык', dishes1: 'блюдо', dishes2: 'блюда', dishes5: 'блюд', rev1: 'отзыв', rev2: 'отзыва', rev5: 'отзывов' },
     az: { openMenu: 'Menyunu aç', callWaiter: 'Ofisiantı çağır', askBill: 'Hesabı istə', cart: 'Səbət', yourOrder: 'Sifarişiniz', total: 'Cəmi',
         sendOrder: 'Sifarişi göndər', orderHint: 'Ofisiant sifarişi təsdiqləyib mətbəxə ötürəcək', service: 'Xidmət', cancel: 'Ləğv et',
-        search: 'Yemək axtar…', notFound: 'Heç nə tapılmadı', add: 'Əlavə et', commentPh: '💬 Qeyd (soğansız, acısız…)', open: 'Açıqdır', closed: 'Bağlıdır',
+        search: 'Yemək axtar…', notFound: 'Heç nə tapılmadı', add: 'Əlavə et', choose: 'Seçin', variants: 'Seçimlər', commentPh: '💬 Qeyd (soğansız, acısız…)', open: 'Açıqdır', closed: 'Bağlıdır',
         table: 'Masa', viewOnly: 'Sifariş üçün masadakı QR-kodu skan edin', wifi: 'Wi-Fi', copied: 'Şifrə kopyalandı', map: 'Necə gəlmək', call: 'Zəng et',
         hours: 'İş saatları', review: 'Rəy yaz', reviewTitle: 'Bizdə necə idi?', reviewText: 'Rəyinizi yalnız restoran rəhbərliyi görəcək',
         reviewPh: 'Nə xoşunuza gəldi, nəyi yaxşılaşdıraq?', contactPh: 'Ad və ya telefon (məcburi deyil)', send: 'Göndər', thanks: 'Rəyiniz üçün təşəkkürlər! 💛',
@@ -602,7 +602,7 @@ const I18N = {
         dishVideo: 'Video', tapSound: 'Səslə baxmaq üçün toxunun', videos: 'Videolar', photos: 'Şəkillər', language: 'Dil', dishes1: 'yemək', dishes2: 'yemək', dishes5: 'yemək', rev1: 'rəy', rev2: 'rəy', rev5: 'rəy' },
     en: { openMenu: 'Open menu', callWaiter: 'Call waiter', askBill: 'Ask for bill', cart: 'Cart', yourOrder: 'Your order', total: 'Total',
         sendOrder: 'Send order', orderHint: 'A waiter will confirm your order and pass it to the kitchen', service: 'Service', cancel: 'Cancel',
-        search: 'Search dishes…', notFound: 'Nothing found', add: 'Add', commentPh: '💬 Note (no onion, not spicy…)', open: 'Open', closed: 'Closed',
+        search: 'Search dishes…', notFound: 'Nothing found', add: 'Add', choose: 'Choose', variants: 'Options', commentPh: '💬 Note (no onion, not spicy…)', open: 'Open', closed: 'Closed',
         table: 'Table', viewOnly: 'Scan the QR code on your table to order', wifi: 'Wi-Fi', copied: 'Password copied', map: 'Directions', call: 'Call us',
         hours: 'Opening hours', review: 'Leave a review', reviewTitle: 'How was your visit?', reviewText: 'Only the restaurant management will see your review',
         reviewPh: 'What did you like, what can we improve?', contactPh: 'Name or phone (optional)', send: 'Send', thanks: 'Thank you for your feedback! 💛',
@@ -819,7 +819,8 @@ function dishView(it) {
     return {
         id: String(it.id), price: it.price, raw: it,
         name: tr(d.name, it.name),
-        desc: S.features.descriptions ? tr(d.desc, '') : '',
+        // сет (05.11): своего описания нет — состав сета (и его время)
+        desc: (S.features.descriptions ? tr(d.desc, '') : '') || (it.set && it.set.desc ? it.set.desc + (it.set.hours ? ' · 🕐 ' + it.set.hours.replace('-', '–') : '') : ''),
         // видео блюда (22.10): без своего фото карточка берёт кадр из ролика
         video: safeUrl(d.video), photo: safeUrl(d.photo) || (safeUrl(d.video) ? safeUrl(d.videoPoster) : ''), badge: d.badge || '',
         stop: !!it.stop, left: it.left, cat: it.category || '—', main: it.main_category || ''
@@ -935,7 +936,7 @@ function renderMenuView() {
         list.map(x => { const i = CATS.indexOf(x); return `<button class="cat ${i === CAT ? 'on' : ''}" data-i="${i}" onclick="pickCat(${i})"${v ? phVar(x.photo) : ''}>${esc(x.title)}</button>`; }).join('');
     $('cats').classList.remove('hidden'); $('tiles').classList.add('hidden');
     if (CAT === GAL) renderGallery();
-    else $('sections').innerHTML = `<div class="section"><h3>${esc(c.title)}</h3><div class="items ${window.LAYOUT}">${c.items.map(cardHtml).join('')}</div></div>`;
+    else $('sections').innerHTML = `<div class="section"><h3>${esc(c.title)}</h3><div class="items ${window.LAYOUT}">${guestCards(c.items)}</div></div>`;
     const on = document.querySelector('.cat.on'); if (on) on.scrollIntoView({ inline: 'center', block: 'nearest' });
 }
 function menuState() { return { screen: 'menu', sec: SEC, cat: CAT }; }
@@ -963,6 +964,61 @@ function cardHtml(d) {
     const inner = window.LAYOUT === 'list' ? info + img : img + info;
     return `<div class="card ${d.stop ? 'stopped' : ''}" onclick="openProduct('${d.id}')">${inner}</div>`;
 }
+// Варианты (03.11): блюда категории с именами «Основа · вариант» («Chivas Regal 12 · 0.7») — одна карточка, выбор внутри.
+// Каждый вариант — своё блюдо со своей ценой; в корзине и в заказе — полное имя.
+const VSEP = ' · ';
+function vSplit(name) { const s = String(name || ''), k = s.indexOf(VSEP); return k > 0 && k < s.length - VSEP.length ? { base: s.slice(0, k).trim(), label: s.slice(k + VSEP.length).trim() } : null; }
+let VGROUPS = [];
+// Варианты одним листом у гостя ВЫКЛЮЧЕНЫ (04.11, TEAMANIA: гостю удобнее видеть каждый вариант отдельным блюдом;
+// касса, терминал и официант — по-прежнему одна плитка с выбором). Вернуть: GUEST_VGROUPS = true
+const GUEST_VGROUPS = false;
+function guestCards(items) {
+    VGROUPS = [];
+    if (!GUEST_VGROUPS) return items.map(cardHtml).join('');
+    const out = [], by = {};
+    items.forEach(d => {
+        const v = vSplit(d.raw.name);
+        if (!v) return out.push({ one: d });
+        const tv = vSplit(d.name) || v;   // перевод названия тоже с « · » — берём его части
+        const k = v.base.toLowerCase();
+        if (!by[k]) out.push({ grp: by[k] = { base: tv.base, items: [] } });
+        by[k].items.push({ d, label: tv.label });
+    });
+    return out.map(x => x.one || x.grp.items.length === 1 ? cardHtml(x.one || x.grp.items[0].d) : grpCardHtml(x.grp)).join('');
+}
+function vPrices(ps) {
+    const u = [...new Set(ps.map(p => Math.round(p * 100) / 100))].sort((a, b) => a - b);
+    // больше двух цен — диапазон: длинный ряд «8 / 90 / 110 / 140» выталкивал «+» за край карточки
+    return u.length === 1 ? money(u[0]) : u.length === 2 ? u.map(p => money(p).replace(' ₼', '')).join(' / ') + ' ₼' : money(u[0]).replace(' ₼', '') + '–' + money(u[u.length - 1]);
+}
+function grpQty(g) { return g.items.reduce((s, x) => s + (cart[x.d.id] ? cart[x.d.id].qty : 0), 0); }
+function grpBtn(n) { const q = grpQty(VGROUPS[n]); return `<button class="add" onclick="event.stopPropagation();openGroup(${n})" aria-label="${esc(t('choose'))}">${q || '+'}</button>`; }
+function grpCardHtml(g) {
+    const n = VGROUPS.push(g) - 1, ds = g.items.map(x => x.d), stop = ds.every(d => d.stop);
+    const photo = (ds.find(d => d.photo) || {}).photo, desc = (ds.find(d => d.desc) || {}).desc || '';
+    const img = photo ? `<img class="ph" src="${esc(photo)}" loading="lazy" alt="">` : '';
+    const control = stop ? `<span class="stopped-label">${esc(t('stop'))}</span>` : tableId && S.features.ordering ? grpBtn(n) : '';
+    const info = `<div class="info"><div class="name">${esc(g.base)}</div>${desc ? `<div class="desc">${esc(desc)}</div>` : ''}
+        <div class="bottom"><span class="price">${vPrices(ds.map(d => d.price))}</span><span id="vg-${n}">${control}</span></div></div>`;
+    return `<div class="card ${stop ? 'stopped' : ''}" onclick="openGroup(${n})">${window.LAYOUT === 'list' ? info + img : img + info}</div>`;
+}
+// число на «+» карточки варианта — сколько всех его вариантов в корзине
+function updateGrpBadges() { VGROUPS.forEach((g, n) => { const el = $('vg-' + n); if (el && !g.items.every(x => x.d.stop) && tableId && S.features.ordering) el.innerHTML = grpBtn(n); }); }
+// лист с вариантами: у каждого своя цена и свои −/+ (обновляются через #q-<id>, как в карточках)
+function openGroup(n) {
+    const g = VGROUPS[n]; if (!g) return;
+    curProduct = null;
+    const ds = g.items.map(x => x.d), photo = (ds.find(d => d.photo) || {}).photo, desc = (ds.find(d => d.desc) || {}).desc || '';
+    const canOrder = tableId && S.features.ordering;
+    $('product-body').innerHTML = (photo ? `<img class="prod-ph" src="${esc(photo)}" alt="">` : '') +
+        `<h2 style="margin-bottom:6px">${esc(g.base)}</h2>` + (desc ? `<p class="muted">${esc(desc)}</p>` : '') +
+        `<div style="font-size:13px;color:var(--muted);margin:12px 0 6px">${esc(t('variants'))}</div>` +
+        g.items.map(x => { const d = x.d, q = cart[d.id] ? cart[d.id].qty : 0;
+            return `<div class="cart-row"><div class="top"><div class="nm">${esc(x.label)}<div class="sm" style="color:var(--accent);font-weight:800">${money(d.price)}</div></div>
+                ${d.stop ? `<span class="stopped-label">${esc(t('stop'))}</span>` : canOrder ? `<span id="q-${d.id}">${qtyHtml(d.id, q)}</span>` : ''}</div></div>`; }).join('') +
+        (!tableId ? `<p class="muted" style="font-size:13px;margin-top:10px">${esc(t('viewOnly'))}</p>` : '');
+    openSheet('product-sheet');
+}
 function qtyHtml(id, q) {
     return q > 0 ? `<span class="qty"><button onclick="chg('${id}',-1,event)">−</button><span>${q}</span><button class="plus" onclick="chg('${id}',1,event)">+</button></span>`
         : `<button class="add" onclick="chg('${id}',1,event)" aria-label="${esc(t('add'))}">+</button>`;
@@ -985,6 +1041,7 @@ function chg(id, delta, ev) {
     if (delta > 0 && ev) flyToCart(ev);
     saveCart(); updateCart();
     document.querySelectorAll('#q-' + CSS.escape(id)).forEach(el => el.innerHTML = qtyHtml(id, cart[id] ? cart[id].qty : 0));
+    updateGrpBadges();
     if ($('product-sheet').classList.contains('show') && curProduct === id) renderProductFoot();
     if ($('cart-sheet').classList.contains('show')) renderCart();
 }
