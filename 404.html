@@ -79,6 +79,11 @@ img { display: block; }
 .seg { display: flex; gap: 4px; margin: 10px 6px 10px; padding: 4px; background: var(--surface); border: 1px solid var(--border); border-radius: 999px; }
 .seg button { flex: 1; min-height: 40px; border: none; border-radius: 999px; background: none; color: var(--text); font-size: 15px; font-weight: 700; cursor: pointer; font-family: inherit; }
 .seg button.on { background: var(--accent); color: var(--accent-text); }
+.seg button { white-space: nowrap; }
+/* больше трёх разделов (Кухня, Бар, Setlər, QALİYAN…) — в одну строку с прокруткой */
+.seg.many { overflow-x: auto; scrollbar-width: none; }
+.seg.many::-webkit-scrollbar { display: none; }
+.seg.many button { flex: none; padding: 0 14px; font-size: 14px; }
 .seg.hidden + .cats { padding-top: 10px; }
 .tiles { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 14px; }
 @media (min-width: 640px) { .tiles { grid-template-columns: repeat(3, 1fr); } }
@@ -488,6 +493,17 @@ html[data-tpl="vitrina"][data-mode="light"] #home > .lang-switch button.on { bac
     <p class="muted" style="text-align:center; margin-top:10px; font-size:12px;" data-t="orderHint"></p>
 </div>
 
+<!-- Выбор в сете (05.11 вечер, TEAMANIA: «Plitka или Türk paxlavası — гость не может выбрать») -->
+<div class="sheet" id="setpick-sheet">
+    <div class="grip"></div>
+    <h2 id="sp-title"></h2>
+    <div id="sp-body" style="display:flex;flex-direction:column;gap:14px"></div>
+    <div class="sheet-foot">
+        <button class="btn sec" onclick="spAsk=null;closeSheets()" data-t="gpsClose"></button>
+        <button class="btn" id="sp-ok" onclick="spOk()" data-t="add"></button>
+    </div>
+</div>
+
 <div class="sheet" id="service-sheet">
     <div class="grip"></div>
     <h2 data-t="service"></h2>
@@ -667,21 +683,21 @@ const $ = id => document.getElementById(id);
 function esc(s) { return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;'); }
 function safeUrl(u) { u = String(u || ''); return /^(https?:|tel:|mailto:|photos\/)/i.test(u) ? u : ''; }
 // геолокация (05.11, Beş Mertebe: «включили — всё равно не заказать»): подсказки, где включить, и «Попробовать снова»
-Object.assign(I18N.ru, { gpsRetry: 'Попробовать снова', gpsClose: 'Закрыть', gpsChecking: 'Определяем место…',
+Object.assign(I18N.ru, { spChoose: 'Выберите:', spNeed: 'Выберите вариант', gpsRetry: 'Попробовать снова', gpsClose: 'Закрыть', gpsChecking: 'Определяем место…',
     gpsDeniedTitle: 'Доступ к месту запрещён',
     gpsIos: 'iPhone: Настройки → Конфиденциальность → Службы геолокации — включить; там же «Сайты Safari» → «При использовании» и «Точная геопозиция». Потом в Safari нажмите «аА» слева от адреса → «Настройки веб-сайта» → Геопозиция → Разрешить.',
     gpsAndroid: 'Android: нажмите на значок слева от адреса (🔒 или ⚙) → Разрешения → Местоположение → Разрешить. И включите геолокацию в верхней шторке телефона.',
     gpsInApp: 'Если меню открыто внутри Instagram, WhatsApp или Telegram — откройте его в Safari или Chrome.',
     gpsSlowTitle: 'Не удалось определить место', gpsSlowText: 'Проверьте, что геолокация на телефоне включена, и нажмите «Попробовать снова». У окна телефон находит место быстрее.',
     gpsPrecise: 'Телефон определяет место слишком неточно. Включите «Точная геопозиция»: iPhone — Настройки → Конфиденциальность → Службы геолокации → Сайты Safari.' });
-Object.assign(I18N.az, { gpsRetry: 'Yenidən yoxla', gpsClose: 'Bağla', gpsChecking: 'Məkan müəyyən edilir…',
+Object.assign(I18N.az, { spChoose: 'Seçin:', spNeed: 'Variant seçin', gpsRetry: 'Yenidən yoxla', gpsClose: 'Bağla', gpsChecking: 'Məkan müəyyən edilir…',
     gpsDeniedTitle: 'Məkana icazə verilməyib',
     gpsIos: 'iPhone: Ayarlar → Məxfilik → Məkan xidmətləri — aktiv edin; orada «Safari saytları» → «İstifadə zamanı» və «Dəqiq məkan». Sonra Safari-də ünvanın solunda «aA» → «Veb-sayt ayarları» → Məkan → İcazə ver.',
     gpsAndroid: 'Android: ünvanın solundakı işarəyə (🔒 və ya ⚙) toxunun → İcazələr → Məkan → İcazə ver. Telefonun yuxarı panelində məkanı da açın.',
     gpsInApp: 'Menyu Instagram, WhatsApp və ya Telegram içində açılıbsa — onu Safari və ya Chrome-da açın.',
     gpsSlowTitle: 'Məkanı müəyyən etmək olmadı', gpsSlowText: 'Telefonda məkanın açıq olduğunu yoxlayın və «Yenidən yoxla» düyməsinə basın. Pəncərə yanında telefon məkanı daha tez tapır.',
     gpsPrecise: 'Telefon məkanı çox qeyri-dəqiq təyin edir. «Dəqiq məkan»ı aktiv edin: iPhone — Ayarlar → Məxfilik → Məkan xidmətləri → Safari saytları.' });
-Object.assign(I18N.en, { gpsRetry: 'Try again', gpsClose: 'Close', gpsChecking: 'Getting your location…',
+Object.assign(I18N.en, { spChoose: 'Choose:', spNeed: 'Choose an option', gpsRetry: 'Try again', gpsClose: 'Close', gpsChecking: 'Getting your location…',
     gpsDeniedTitle: 'Location access is blocked',
     gpsIos: 'iPhone: Settings → Privacy → Location Services — turn on; there, “Safari Websites” → “While Using” and “Precise Location”. Then in Safari tap “aA” left of the address → “Website Settings” → Location → Allow.',
     gpsAndroid: 'Android: tap the icon left of the address (🔒 or ⚙) → Permissions → Location → Allow. Also turn on location in the phone’s top panel.',
@@ -865,7 +881,10 @@ function buildMenu() {
         const cat = k.slice(k.indexOf('|') + 1);
         // фото плитки: своё фото категории (админка), иначе — первое блюдо с фото
         const photo = safeUrl((cfgCats[cat] || {}).photo) || (groups[k].find(d => d.photo) || {}).photo || '';
-        return { key: k, sec: k.slice(0, k.indexOf('|')), title: tr((cfgCats[cat] || {}).name, cat), items: groups[k], order: (cfgCats[cat] || {}).order, n: first[k], photo };
+        const sec = k.slice(0, k.indexOf('|'));
+        // «Общее» — блюда прямо в разделе: показываем название раздела, не слово «Общее» (05.11)
+        const dflt = cat === 'Общее' ? (sec === 'KUXNYA' ? t('kitchen') : sec === 'BAR' ? t('bar') : sec) : cat;
+        return { key: k, sec, title: tr((cfgCats[cat] || {}).name, dflt), items: groups[k], order: (cfgCats[cat] || {}).order, n: first[k], photo };
     }).sort((a, b) => {
         const ao = a.order != null ? a.order : 1000, bo = b.order != null ? b.order : 1000;
         return ao - bo || secRank(a.sec) - secRank(b.sec) || a.n - b.n;
@@ -880,6 +899,7 @@ function secOf(d) { return d.main && d.main !== 'KUXNYA' ? d.main : 'KUXNYA'; }
 function secRank(s) { return s === 'KUXNYA' ? 0 : s === 'BAR' ? 1 : 2; }
 function renderSeg(secs) {
     const ico = { KUXNYA: '🍽️', BAR: '🍸' };
+    $('seg').classList.toggle('many', secs.length > 3);
     $('seg').innerHTML = secs.map(s => `<button type="button" data-sec="${esc(s)}" onclick="setSection(this.dataset.sec)">${ico[s] || '🧩'} <span>${esc(s === 'KUXNYA' ? t('kitchen') : s === 'BAR' ? t('bar') : s)}</span></button>`).join('');
 }
 // «Интерьер и видео» (22.10): первая плитка и первая кнопка в строке категорий, CAT = GAL
@@ -958,8 +978,11 @@ function renderMenuView() {
     $('seg').classList.toggle('hidden', secs.length < 2);
     document.querySelectorAll('#seg button').forEach(b => b.classList.toggle('on', b.dataset.sec === SEC));
     const list = CATS.filter(c => c.sec === SEC);
-    const c = CATS[CAT], v = IS_V(), gal = galList();
+    let c = CATS[CAT];
+    const v = IS_V(), gal = galList();
     if (CAT === GAL && !gal.length) CAT = -1;
+    // в разделе одна группа (05.11, TEAMANIA «QALİYAN»: блюда прямо в разделе) — сразу блюда, без плитки «Общее»
+    if (CAT !== GAL && (!c || c.sec !== SEC) && list.length === 1) { CAT = CATS.indexOf(list[0]); c = list[0]; }
     if (CAT !== GAL && (!c || c.sec !== SEC)) {
         CAT = -1;
         $('tiles').innerHTML = galTile() + list.map(x => `<button class="tile" type="button" onclick="openCat(${CATS.indexOf(x)})"${v ? phVar(x.photo) : ''}><b>${esc(x.title)}</b><small>${v ? esc(plural(x.items.length, 'dishes')) : x.items.length}</small></button>`).join('');
@@ -1064,13 +1087,55 @@ function qtyHtml(id, q) {
 function loadCart() { try { cart = JSON.parse(localStorage.getItem('qr_cart') || '{}') || {}; } catch (e) { cart = {}; } }
 function saveCart() { try { localStorage.setItem('qr_cart', JSON.stringify(cart)); } catch (e) {} }
 function findItem(id) { return ITEMS.find(d => d.id === String(id)); }
-function chg(id, delta, ev) {
+// ----- Сет с выбором: «Plitka / Türk paxlavası», «Cola / Fanta» — гость выбирает при добавлении -----
+// выбор пишется в комментарий строки, по порции через «; » (как на кассе) — по нему мотор печатает марки
+function setChoices(d) { const st = d && d.raw && d.raw.set; return st && Array.isArray(st.parts) ? st.parts.map((p, k) => ({ k, or: p.or || [] })).filter(p => p.or.length > 1) : []; }
+let spAsk = null;
+function openSetPick(id) {
+    const d = findItem(id), ch = setChoices(d);
+    spAsk = { id, pick: {} };
+    $('sp-title').textContent = '🧩 ' + d.name;
+    $('sp-body').innerHTML = ch.map(p => `<div><div class="muted" style="font-size:13px;margin-bottom:6px">${esc(t('spChoose'))}</div><div class="lang-pick" style="flex-wrap:wrap">` +
+        p.or.map((o, j) => `<button type="button" data-k="${p.k}" data-j="${j}" onclick="spPick(${p.k},${j})">${esc(o.name)}</button>`).join('') + '</div></div>').join('');
+    spRefresh();
+    openSheet('setpick-sheet');
+}
+function spPick(k, j) { if (!spAsk) return; spAsk.pick[k] = j; spRefresh(); }
+function spRefresh() {
+    const ch = spAsk ? setChoices(findItem(spAsk.id)) : [];
+    document.querySelectorAll('#sp-body button').forEach(b => b.classList.toggle('on', spAsk && spAsk.pick[b.dataset.k] === +b.dataset.j));
+    $('sp-ok').disabled = !spAsk || ch.some(p => spAsk.pick[p.k] == null);
+}
+function spOk() {
+    const a = spAsk; if (!a) return;
+    const d = findItem(a.id), ch = setChoices(d);
+    if (ch.some(p => a.pick[p.k] == null)) return toast(t('spNeed'));
+    const pick = ch.map(p => p.or[a.pick[p.k]].name).join(', ');
+    spAsk = null; closeSheets();
+    if (!chg(a.id, 1, null, true)) return;
+    const cm = String(cart[a.id].comment || '').trim();
+    cart[a.id].comment = (cm ? cm + '; ' : '') + pick;
+    saveCart(); if ($('cart-sheet').classList.contains('show')) renderCart();
+    toast('✓ ' + d.name + ': ' + pick);
+}
+// убрали порцию — убрать и её выбор (последний)
+function spDrop(id) {
+    const ch = setChoices(findItem(id)); if (!ch.length || !cart[id]) return;
+    const names = ch.flatMap(p => p.or.map(o => String(o.name || '').toLowerCase()));
+    const parts = String(cart[id].comment || '').split(';').map(x => x.trim()).filter(Boolean);
+    const j = parts.map(x => names.some(nm => x.toLowerCase().includes(nm))).lastIndexOf(true);
+    if (j >= 0) parts.splice(j, 1);
+    cart[id].comment = parts.join('; ');
+}
+function chg(id, delta, ev, picked) {
     if (ev) ev.stopPropagation();
-    if (!tableId) return toast(t('viewOnly'));
-    const d = findItem(id); if (!d || d.stop) return;
+    if (!tableId) { toast(t('viewOnly')); return false; }
+    const d = findItem(id); if (!d || d.stop) return false;
+    if (delta > 0 && !picked && setChoices(d).length) { openSetPick(id); return false; }
     const cur = cart[id] ? cart[id].qty : 0;
     let n = cur + delta;
     if (d.left != null && n > d.left) { toast(t('left') + ': ' + d.left); n = d.left; }
+    if (delta < 0 && n > 0) spDrop(id);
     if (n <= 0) delete cart[id]; else cart[id] = { qty: n, comment: cart[id] ? cart[id].comment : '' };
     if (delta > 0 && ev) flyToCart(ev);
     saveCart(); updateCart();
@@ -1078,6 +1143,7 @@ function chg(id, delta, ev) {
     updateGrpBadges();
     if ($('product-sheet').classList.contains('show') && curProduct === id) renderProductFoot();
     if ($('cart-sheet').classList.contains('show')) renderCart();
+    return true;
 }
 function cartTotals() {
     let sum = 0, cnt = 0;
