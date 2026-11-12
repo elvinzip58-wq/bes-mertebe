@@ -559,6 +559,25 @@ html[data-tpl="vitrina"][data-mode="light"] #home > .lang-switch button.on { bac
 
 <script>window.QR_API_BASE="https://5mertebe-server.sufraaz.com";window.QR_DATA_BASE='.';</script>
 <script>
+// 12.11: ошибки QR-меню у гостя → сервер ресторана («Ошибки и проверки» → пульт). Только ошибки нашего кода
+// (не расширений и не чужих скриптов телефона), не больше 5 за посещение; в тексте — стол, без данных гостя.
+(function () {
+    var sent = 0, seen = {};
+    function own(file, stack) { var s = String(file || '') + ' ' + String(stack || ''); return s.indexOf(location.origin) >= 0 || /menu\.html/.test(s); }
+    function send(message, stack) {
+        try {
+            var key = String(message).slice(0, 100);
+            if (sent >= 5 || seen[key]) return; seen[key] = 1; sent++;
+            var p = new URLSearchParams(location.search), t = p.get('table') || sessionStorage.getItem('qr_table') || '', h = p.get('hall') || sessionStorage.getItem('qr_hall') || '';
+            fetch('/api/client-error', { method: 'POST', headers: { 'Content-Type': 'application/json', 'ngrok-skip-browser-warning': '1' }, keepalive: true,
+                body: JSON.stringify({ page: 'QR-меню', message: String(message).slice(0, 300), stack: String(stack || '').slice(0, 600), url: location.pathname + (t ? ' · ' + h + ' ' + t : ''), kind: 'guest' }) }).catch(function () {});
+        } catch (e) {}
+    }
+    window.addEventListener('error', function (e) { if (e && e.message && own(e.filename, e.error && e.error.stack)) send(e.message, e.error && e.error.stack); });
+    window.addEventListener('unhandledrejection', function (e) { var r = e && e.reason; if (r && r.stack && own('', r.stack)) send(r.message || String(r), r.stack); });
+})();
+</script>
+<script>
 // =====================================================================
 //  ШАБЛОНЫ ОФОРМЛЕНИЯ
 // =====================================================================
@@ -706,7 +725,9 @@ Object.assign(I18N.en, { spChoose: 'Choose:', spNeed: 'Choose an option', gpsRet
     gpsPrecise: 'Your phone reports the location too roughly. Turn on “Precise Location”: iPhone — Settings → Privacy → Location Services → Safari Websites.' });
 function t(k) { return (I18N[lang] && I18N[lang][k]) || I18N.ru[k] || k; }
 function money(x) { return (Math.round((+x || 0) * 100) / 100).toLocaleString('ru-RU', { maximumFractionDigits: 2 }) + ' ₼'; }
-function tr(obj, fallback) { return (obj && (obj[lang] || obj.ru || obj.az || obj.en)) || fallback || ''; }
+// 12.11: перевод на языке гостя, иначе оригинал (название из программы), и только потом — любой другой перевод
+// (раньше азербайджанский гость видел русское название, если был заполнен только русский перевод)
+function tr(obj, fallback) { return (obj && obj[lang]) || fallback || (obj && (obj.az || obj.ru || obj.en)) || ''; }
 // «5 блюд», «2 отзыва»: русские окончания, в az/en — одна-две формы
 function plural(n, k) {
     const a = n % 10, b = n % 100;
@@ -883,7 +904,7 @@ function buildMenu() {
         const photo = safeUrl((cfgCats[cat] || {}).photo) || (groups[k].find(d => d.photo) || {}).photo || '';
         const sec = k.slice(0, k.indexOf('|'));
         // «Общее» — блюда прямо в разделе: показываем название раздела, не слово «Общее» (05.11)
-        const dflt = cat === 'Общее' ? (sec === 'KUXNYA' ? t('kitchen') : sec === 'BAR' ? t('bar') : sec) : cat;
+        const dflt = cat === 'Общее' ? secLabel(sec) : cat;
         return { key: k, sec, title: tr((cfgCats[cat] || {}).name, dflt), items: groups[k], order: (cfgCats[cat] || {}).order, n: first[k], photo };
     }).sort((a, b) => {
         const ao = a.order != null ? a.order : 1000, bo = b.order != null ? b.order : 1000;
@@ -896,11 +917,13 @@ function buildMenu() {
 let SEC = 'KUXNYA', CAT = -1;   // открытый раздел и категория (-1 — плитки категорий)
 // раздел блюда: Кухня, Бар или свой (05.11, «Setlər» — название группы как есть)
 function secOf(d) { return d.main && d.main !== 'KUXNYA' ? d.main : 'KUXNYA'; }
+// 12.11: название раздела на языке гостя — Кухня/Бар из словаря, свои разделы (QƏLYAN, SETLƏR…) — из переводов админки
+function secLabel(s) { return s === 'KUXNYA' ? t('kitchen') : s === 'BAR' ? t('bar') : tr(((S && S.categories) || {})[s] && S.categories[s].name, s); }
 function secRank(s) { return s === 'KUXNYA' ? 0 : s === 'BAR' ? 1 : 2; }
 function renderSeg(secs) {
     const ico = { KUXNYA: '🍽️', BAR: '🍸' };
     $('seg').classList.toggle('many', secs.length > 3);
-    $('seg').innerHTML = secs.map(s => `<button type="button" data-sec="${esc(s)}" onclick="setSection(this.dataset.sec)">${ico[s] || '🧩'} <span>${esc(s === 'KUXNYA' ? t('kitchen') : s === 'BAR' ? t('bar') : s)}</span></button>`).join('');
+    $('seg').innerHTML = secs.map(s => `<button type="button" data-sec="${esc(s)}" onclick="setSection(this.dataset.sec)">${ico[s] || '🧩'} <span>${esc(secLabel(s))}</span></button>`).join('');
 }
 // «Интерьер и видео» (22.10): первая плитка и первая кнопка в строке категорий, CAT = GAL
 const GAL = -2;
