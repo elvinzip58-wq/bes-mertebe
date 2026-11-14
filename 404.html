@@ -682,6 +682,7 @@ const params = new URLSearchParams(location.search);
 const IS_PREVIEW = params.get('preview') === '1';
 let S = null;               // настройки (guest_settings.json)
 let MENU = [];              // меню из 1С
+let TOUR = null;            // 13.11: стол «Turist» — туристические цены { id блюда: цена } (официант отметил стол)
 let security = {};
 let lang = 'ru';
 let cart = {};              // { id: { qty, comment } }
@@ -880,15 +881,17 @@ let CATS = [];    // [{ key, title, items }]
 function dishView(it) {
     const d = (S.dishes || {})[it.id] || {};
     return {
-        id: String(it.id), price: it.price, raw: it,
+        id: String(it.id), price: TOUR && typeof TOUR[it.id] === 'number' ? TOUR[it.id] : it.price, raw: it,
         name: tr(d.name, it.name),
         // сет (05.11): своего описания нет — состав сета (и его время)
         desc: (S.features.descriptions ? tr(d.desc, '') : '') || (it.set && it.set.desc ? it.set.desc + (it.set.hours ? ' · 🕐 ' + it.set.hours.replace('-', '–') : '') : ''),
         // видео блюда (22.10): без своего фото карточка берёт кадр из ролика
         video: safeUrl(d.video), photo: safeUrl(d.photo) || (safeUrl(d.video) ? safeUrl(d.videoPoster) : ''), badge: d.badge || '',
+        weight: !!it.weight,   // 13.11: цена за 1 кг (рыба по весу — вес уточнит официант)
         stop: !!it.stop, left: it.left, cat: it.category || '—', main: it.main_category || ''
     };
 }
+const perKg = () => ' / ' + ({ az: 'kq', ru: 'кг' }[lang] || 'kg');
 function buildMenu() {
     if (!S || !MENU.length) return;
     const cfgCats = S.categories || {};
@@ -1040,7 +1043,7 @@ function cardHtml(d) {
     const left = (!d.stop && d.left != null && d.left <= 5) ? ` · ${esc(t('left'))}: ${d.left}` : '';
     const control = d.stop ? `<span class="stopped-label">${esc(t('stop'))}</span>` : (tableId && S.features.ordering ? qtyHtml(d.id, q) : '');
     const info = `<div class="info">${badge}<div class="name">${esc(d.name)}</div>${d.desc ? `<div class="desc">${esc(d.desc)}</div>` : ''}
-        <div class="bottom"><span class="price">${money(d.price)}<small style="color:var(--muted);font-weight:600;font-size:12px">${left}</small></span><span id="q-${d.id}" onclick="event.stopPropagation()">${control}</span></div></div>`;
+        <div class="bottom"><span class="price">${money(d.price)}${d.weight ? perKg() : ''}<small style="color:var(--muted);font-weight:600;font-size:12px">${left}</small></span><span id="q-${d.id}" onclick="event.stopPropagation()">${control}</span></div></div>`;
     const inner = window.LAYOUT === 'list' ? info + img : img + info;
     return `<div class="card ${d.stop ? 'stopped' : ''}" onclick="openProduct('${d.id}')">${inner}</div>`;
 }
@@ -1467,6 +1470,23 @@ function chooseLang() {
 }
 function applyAll() { applyTheme(); renderHome(); buildMenu(); updateCart(); }
 
+// Стол «Turist» (13.11): официант отметил стол — гость видит туристические цены (заказ сервер всё равно считает сам).
+// Первый раз и язык ещё не выбран, а языка телефона в меню нет — меню по-английски (если английский включён).
+async function checkTourist(first) {
+    if (!tableId) return;
+    let j = null;
+    try { j = await getJson('/api/tourist-table?hall=' + encodeURIComponent(hall || '') + '&table=' + encodeURIComponent(tableId), API, 1); } catch (e) { return; }
+    const next = j && j.tourist && j.prices && typeof j.prices === 'object' ? j.prices : null;
+    if (JSON.stringify(next) === JSON.stringify(TOUR)) return;
+    TOUR = next;
+    if (TOUR && first && S && S.languages && (S.languages.enabled || []).includes('en')) {
+        let saved = null; try { saved = localStorage.getItem('qr_lang'); } catch (e) {}
+        const nav = (navigator.language || '').slice(0, 2);
+        if (!saved && !(S.languages.enabled || []).includes(nav) && lang !== 'en') { lang = 'en'; document.documentElement.lang = 'en'; renderHome(); }
+    }
+    buildMenu(); updateCart();
+}
+
 async function init() {
     loadCart();
     try { S = await getJson('/guest_settings.json', DATA); } catch (e) { S = null; }
@@ -1483,6 +1503,7 @@ async function init() {
         getJson('/guest_settings.json', API).then(s => { if (s && JSON.stringify(s) !== JSON.stringify(S)) { S = s; chooseLang(); applyAll(); } }).catch(() => {});
     }
     if (tracked().length) startTracking();
+    checkTourist(true); setInterval(() => { if (!document.hidden) checkTourist(false); }, 30000);
     history.replaceState({ screen: 'home' }, '');
     if (params.get('open') === 'menu') openMenu();
 }
